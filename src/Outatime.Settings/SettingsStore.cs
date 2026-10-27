@@ -11,7 +11,16 @@ internal static class SettingsStore
     private static readonly string SettingsDirectory = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Outatime");
 
-    private static readonly string FilePath = Path.Combine(SettingsDirectory, "settings.json");
+    public static readonly string FilePath = Path.Combine(SettingsDirectory, "settings.json");
+
+    // Writes the current settings if there is no file yet, so it can be opened in an editor.
+    public static void EnsureFileExists()
+    {
+        if (!File.Exists(FilePath))
+        {
+            SaveMode(LoadMode());
+        }
+    }
 
     public static string LoadMode()
     {

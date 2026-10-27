@@ -1,6 +1,8 @@
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -14,13 +16,18 @@ public sealed partial class MainWindow : Window
     private const int DefaultWidth = 640;
     private const int DefaultHeight = 520;
     private const int ErrorCancelled = 1223;
+    // The resident process closes windows with this property when the user exits it (main.cpp).
+    private const string WindowProperty = "Outatime.Settings";
 
     private readonly ResourceLoader _resources = new();
     private readonly nint _hwnd;
+    private readonly DispatcherQueueTimer _residentTimer;
 
     // Set while the code changes a selection, so the change handlers ignore it.
     private bool _updatingSelection;
     private StartupMode _startupMode;
+    // Set while starting or restarting the resident, so the info bars don't flicker.
+    private bool _residentActionInProgress;
 
     public MainWindow()
     {
@@ -38,23 +45,40 @@ public sealed partial class MainWindow : Window
 
         _startupMode = StartupManager.GetMode();
         _updatingSelection = true;
-        var mode = SettingsStore.LoadMode();
-        ModeComboBox.SelectedItem = ModeComboBox.Items.OfType<ComboBoxItem>()
-            .FirstOrDefault(item => (string)item.Tag == mode) ?? ModeComboBox.Items[0];
         StartupComboBox.SelectedIndex = (int)_startupMode;
         _updatingSelection = false;
+        LoadMode();
 
+        SettingsFileCard.Description = SettingsStore.FilePath;
         ShowBuildInfo();
 
-        UpdateRestartInfoBar();
-        // The resident may have been restarted elsewhere while this window was in the background.
+        SetPropW(_hwnd, WindowProperty, 1);
+        Closed += (_, _) => RemovePropW(_hwnd, WindowProperty);
+
+        // The resident can start, exit or crash at any time; checking is a single FindWindow call.
+        UpdateResidentInfoBars();
+        _residentTimer = DispatcherQueue.CreateTimer();
+        _residentTimer.Interval = TimeSpan.FromSeconds(1);
+        _residentTimer.Tick += (_, _) => UpdateResidentInfoBars();
+        _residentTimer.Start();
+
+        // The settings file may have been edited while this window was in the background.
         Activated += (_, args) =>
         {
             if (args.WindowActivationState != WindowActivationState.Deactivated)
             {
-                UpdateRestartInfoBar();
+                LoadMode();
             }
         };
+    }
+
+    private void LoadMode()
+    {
+        var mode = SettingsStore.LoadMode();
+        _updatingSelection = true;
+        ModeComboBox.SelectedItem = ModeComboBox.Items.OfType<ComboBoxItem>()
+            .FirstOrDefault(item => (string)item.Tag == mode) ?? ModeComboBox.Items[0];
+        _updatingSelection = false;
     }
 
     private void ShowBuildInfo()
@@ -112,7 +136,7 @@ public sealed partial class MainWindow : Window
         {
             await StartupManager.SetModeAsync(mode);
             _startupMode = mode;
-            UpdateRestartInfoBar();
+            UpdateResidentInfoBars();
         }
         catch (Win32Exception ex) when (ex.NativeErrorCode == ErrorCancelled)
         {
@@ -131,29 +155,59 @@ public sealed partial class MainWindow : Window
 
     private bool ShouldRunElevated => _startupMode == StartupMode.Elevated;
 
-    private void UpdateRestartInfoBar()
+    private void UpdateResidentInfoBars()
     {
+        if (_residentActionInProgress)
+        {
+            return;
+        }
         var elevated = ResidentProcess.IsElevated();
+        NotRunningInfoBar.IsOpen = elevated is null;
         RestartInfoBar.IsOpen = elevated is not null && elevated != ShouldRunElevated;
         RestartInfoBar.Title = _resources.GetString(ShouldRunElevated ? "RestartElevatedTitle" : "RestartNormalTitle");
         RestartInfoBar.Message = _resources.GetString("RestartMessage");
     }
 
+    private async void StartButton_Click(object sender, RoutedEventArgs e)
+    {
+        await RunResidentActionAsync(StartButton, "StartErrorTitle", () => ResidentProcess.StartAsync(ShouldRunElevated));
+    }
+
     private async void RestartButton_Click(object sender, RoutedEventArgs e)
     {
-        RestartButton.IsEnabled = false;
+        await RunResidentActionAsync(RestartButton, "RestartErrorTitle", () => ResidentProcess.RestartAsync(ShouldRunElevated));
+    }
+
+    private async Task RunResidentActionAsync(Button button, string errorTitleKey, Func<Task> action)
+    {
+        button.IsEnabled = false;
+        _residentActionInProgress = true;
         try
         {
-            await ResidentProcess.RestartAsync(ShouldRunElevated);
+            await action();
         }
         catch (Exception ex)
         {
-            await ShowErrorAsync("RestartErrorTitle", ex.Message);
+            await ShowErrorAsync(errorTitleKey, ex.Message);
         }
         finally
         {
-            RestartButton.IsEnabled = true;
-            UpdateRestartInfoBar();
+            button.IsEnabled = true;
+            _residentActionInProgress = false;
+            UpdateResidentInfoBars();
+        }
+    }
+
+    private async void OpenSettingsFileButton_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            SettingsStore.EnsureFileExists();
+            Process.Start(new ProcessStartInfo(SettingsStore.FilePath) { UseShellExecute = true })?.Dispose();
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorAsync("OpenSettingsFileErrorTitle", ex.Message);
         }
     }
 
@@ -182,4 +236,11 @@ public sealed partial class MainWindow : Window
     [LibraryImport("user32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static partial bool SetForegroundWindow(nint hwnd);
+
+    [LibraryImport("user32.dll", StringMarshalling = StringMarshalling.Utf16)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static partial bool SetPropW(nint hwnd, string name, nint data);
+
+    [LibraryImport("user32.dll", StringMarshalling = StringMarshalling.Utf16)]
+    private static partial nint RemovePropW(nint hwnd, string name);
 }
