@@ -44,8 +44,7 @@ public sealed partial class MainWindow : Window
         StartupComboBox.SelectedIndex = (int)_startupMode;
         _updatingSelection = false;
 
-        var version = Assembly.GetExecutingAssembly().GetName().Version!.ToString(3);
-        AboutCard.Description = string.Format(_resources.GetString("AboutVersion"), version);
+        ShowBuildInfo();
 
         UpdateRestartInfoBar();
         // The resident may have been restarted elsewhere while this window was in the background.
@@ -56,6 +55,23 @@ public sealed partial class MainWindow : Window
                 UpdateRestartInfoBar();
             }
         };
+    }
+
+    private void ShowBuildInfo()
+    {
+        var assembly = Assembly.GetExecutingAssembly();
+        var version = assembly.GetName().Version!.ToString(3);
+        AboutCard.Description = string.Format(_resources.GetString("AboutVersion"), version);
+
+        // The .NET SDK appends the git commit to the informational version: "0.1.0+<sha>".
+        var informational = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+        var commit = informational?.Split('+') is [_, var sha, ..] ? sha[..Math.Min(7, sha.Length)] : null;
+#if DEBUG
+        const string configuration = "Debug";
+#else
+        const string configuration = "Release";
+#endif
+        BuildInfoText.Text = commit is null ? configuration : $"{commit} · {configuration}";
     }
 
     public void BringToFront()
@@ -119,8 +135,8 @@ public sealed partial class MainWindow : Window
     {
         var elevated = ResidentProcess.IsElevated();
         RestartInfoBar.IsOpen = elevated is not null && elevated != ShouldRunElevated;
-        RestartTitleRun.Text = _resources.GetString(ShouldRunElevated ? "RestartElevatedTitle" : "RestartNormalTitle");
-        RestartMessageRun.Text = _resources.GetString("RestartMessage");
+        RestartInfoBar.Title = _resources.GetString(ShouldRunElevated ? "RestartElevatedTitle" : "RestartNormalTitle");
+        RestartInfoBar.Message = _resources.GetString("RestartMessage");
     }
 
     private async void RestartButton_Click(object sender, RoutedEventArgs e)

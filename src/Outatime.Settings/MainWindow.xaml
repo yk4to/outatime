@@ -55,31 +55,14 @@
                     </ComboBox>
                 </controls:SettingsCard>
 
-                <!--
-                    Shown when the running resident's privilege level differs from the startup setting.
-                    Title, Message and ActionButton are left empty so the content sits on the first row,
-                    which lets the button align to the right edge.
-                -->
+                <!-- Shown when the running resident's privilege level differs from the startup setting. -->
                 <InfoBar
                     x:Name="RestartInfoBar"
                     IsClosable="False"
                     Severity="Warning">
-                    <Grid Margin="0,12" ColumnSpacing="16">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock VerticalAlignment="Center" TextWrapping="WrapWholeWords">
-                            <Run x:Name="RestartTitleRun" FontWeight="SemiBold" />
-                            <Run x:Name="RestartMessageRun" />
-                        </TextBlock>
-                        <Button
-                            x:Name="RestartButton"
-                            x:Uid="RestartButton"
-                            Grid.Column="1"
-                            VerticalAlignment="Center"
-                            Click="RestartButton_Click" />
-                    </Grid>
+                    <InfoBar.ActionButton>
+                        <Button x:Name="RestartButton" x:Uid="RestartButton" Click="RestartButton_Click" />
+                    </InfoBar.ActionButton>
                 </InfoBar>
 
                 <TextBlock
@@ -91,6 +74,11 @@
                     <controls:SettingsCard.HeaderIcon>
                         <FontIcon Glyph="&#xE946;" />
                     </controls:SettingsCard.HeaderIcon>
+                    <!-- Selectable so it can be copied into bug reports. -->
+                    <TextBlock
+                        x:Name="BuildInfoText"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        IsTextSelectionEnabled="True" />
                 </controls:SettingsCard>
             </StackPanel>
         </ScrollViewer>
