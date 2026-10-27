@@ -12,15 +12,23 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Version>0.1.0</Version>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <!-- Program.Main handles single-instance redirection before starting XAML. -->
+    <DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
 
     <UseWinUI>true</UseWinUI>
     <!-- Unpackaged app, distributed as a zip -->
     <WindowsPackageType>None</WindowsPackageType>
     <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
     <PublishAot>true</PublishAot>
+
+    <!-- Same layout as the zip: Outatime.exe + settings\Outatime.Settings.exe -->
+    <OutDir>$(MSBuildThisFileDirectory)..\..\build\bin\$(Configuration)\settings\</OutDir>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.2.251219" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.5.1" />
   </ItemGroup>
 

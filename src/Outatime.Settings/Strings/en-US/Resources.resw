@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <data name="AppTitle" xml:space="preserve">
+    <value>Outatime Settings</value>
+  </data>
+  <data name="SettingsTitle.Text" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+
+  <data name="ModeCard.Header" xml:space="preserve">
+    <value>Alt key behavior</value>
+  </data>
+  <data name="ModeCard.Description" xml:space="preserve">
+    <value>What happens when you press an Alt key on its own</value>
+  </data>
+  <data name="ModeToggle.Content" xml:space="preserve">
+    <value>Left Alt toggles the IME</value>
+  </data>
+  <data name="ModeLeftOffRightOn.Content" xml:space="preserve">
+    <value>Left Alt turns the IME off, Right Alt turns it on</value>
+  </data>
+  <data name="ModeDisabled.Content" xml:space="preserve">
+    <value>Do nothing</value>
+  </data>
+
+  <data name="StartupCard.Header" xml:space="preserve">
+    <value>Start at sign-in</value>
+  </data>
+  <data name="StartupCard.Description" xml:space="preserve">
+    <value>Run as administrator to also switch the IME in apps running as administrator</value>
+  </data>
+  <data name="StartupOff.Content" xml:space="preserve">
+    <value>Off</value>
+  </data>
+  <data name="StartupNormal.Content" xml:space="preserve">
+    <value>On</value>
+  </data>
+  <data name="StartupElevated.Content" xml:space="preserve">
+    <value>On, as administrator</value>
+  </data>
+
+  <data name="RestartElevatedTitle" xml:space="preserve">
+    <value>Outatime isn't running as administrator</value>
+  </data>
+  <data name="RestartNormalTitle" xml:space="preserve">
+    <value>Outatime is running as administrator</value>
+  </data>
+  <data name="RestartMessage" xml:space="preserve">
+    <value>Restart it to apply this setting now.</value>
+  </data>
+  <data name="RestartButton.Content" xml:space="preserve">
+    <value>Restart</value>
+  </data>
+
+  <data name="AboutHeader.Text" xml:space="preserve">
+    <value>About</value>
+  </data>
+  <data name="AboutCard.Header" xml:space="preserve">
+    <value>Outatime</value>
+  </data>
+  <data name="AboutVersion" xml:space="preserve">
+    <value>Version {0}</value>
+  </data>
+
+  <data name="SaveErrorTitle" xml:space="preserve">
+    <value>Couldn't save settings</value>
+  </data>
+  <data name="StartupErrorTitle" xml:space="preserve">
+    <value>Couldn't change the startup setting</value>
+  </data>
+  <data name="RestartErrorTitle" xml:space="preserve">
+    <value>Couldn't restart Outatime</value>
+  </data>
+  <data name="ErrorDialogClose" xml:space="preserve">
+    <value>OK</value>
+  </data>
+</root>

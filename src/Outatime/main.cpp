@@ -13,8 +13,10 @@ namespace {
 using outatime::AltKey;
 using outatime::Mode;
 
+// The settings app uses these names too (ResidentProcess.cs).
 constexpr wchar_t kWindowClass[] = L"Outatime.Resident";
 constexpr wchar_t kMutexName[] = L"Local\\Outatime.Resident";
+constexpr wchar_t kElevatedProperty[] = L"Outatime.Elevated";
 constexpr wchar_t kAppName[] = L"Outatime";
 
 constexpr UINT kTrayIconId = 1;
@@ -35,6 +37,19 @@ constexpr UINT kReloadDelayMs = 200;
 UINT g_taskbarCreatedMsg = 0;
 
 outatime::Settings g_settings;
+
+bool IsElevated() {
+    HANDLE token = nullptr;
+    if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &token)) {
+        return false;
+    }
+    TOKEN_ELEVATION elevation{};
+    DWORD size = 0;
+    const bool ok =
+        GetTokenInformation(token, TokenElevation, &elevation, sizeof(elevation), &size) != FALSE;
+    CloseHandle(token);
+    return ok && elevation.TokenIsElevated;
+}
 
 void ApplyMode(Mode mode) {
     outatime::SetAltTapKeys(mode != Mode::Disabled, mode == Mode::LeftOffRightOn);
@@ -167,6 +182,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         break;
 
     case WM_DESTROY:
+        RemovePropW(hwnd, kElevatedProperty);
         RemoveTrayIcon(hwnd);
         PostQuitMessage(0);
         return 0;
@@ -185,7 +201,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
 int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int) {
     HANDLE mutex = CreateMutexW(nullptr, FALSE, kMutexName);
-    if (GetLastError() == ERROR_ALREADY_EXISTS) {
+    // ERROR_ACCESS_DENIED: an elevated instance owns the mutex.
+    if (const DWORD error = GetLastError();
+        error == ERROR_ALREADY_EXISTS || error == ERROR_ACCESS_DENIED) {
         return 0;
     }
 
@@ -198,14 +216,20 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int) {
     wc.lpszClassName = kWindowClass;
     RegisterClassExW(&wc);
 
-    // A hidden top-level window (not message-only) so it receives TaskbarCreated broadcasts.
+    // A hidden top-level window (not message-only) so it receives TaskbarCreated broadcasts
+    // and the settings app can find it with FindWindow.
     HWND hwnd = CreateWindowExW(0, kWindowClass, kAppName, WS_OVERLAPPED, 0, 0, 0, 0, nullptr,
                                 nullptr, instance, nullptr);
     if (!hwnd) {
         return 1;
     }
 
-    // Let Explorer reach us even when we run elevated.
+    // Tell the settings app whether we run elevated, and let it close us (to restart
+    // with the other privilege level) and Explorer reach us even when we do.
+    if (IsElevated()) {
+        SetPropW(hwnd, kElevatedProperty, reinterpret_cast<HANDLE>(1));
+    }
+    ChangeWindowMessageFilterEx(hwnd, WM_CLOSE, MSGFLT_ALLOW, nullptr);
     ChangeWindowMessageFilterEx(hwnd, g_taskbarCreatedMsg, MSGFLT_ALLOW, nullptr);
 
     g_settings = outatime::LoadSettings().value_or(outatime::Settings{});

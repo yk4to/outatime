@@ -24,7 +24,11 @@ target_compile_definitions(Outatime PRIVATE
 
 target_compile_options(Outatime PRIVATE /W4 /permissive- /utf-8)
 
-target_link_libraries(Outatime PRIVATE user32 shell32 imm32 ole32 nlohmann_json::nlohmann_json)
+target_link_libraries(Outatime PRIVATE user32 shell32 imm32 ole32 advapi32 nlohmann_json::nlohmann_json)
+
+# Same layout as the zip: Outatime.exe + settings\Outatime.Settings.exe
+set_property(TARGET Outatime PROPERTY
+    RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/build/bin/$<CONFIG>")
 
 # Link the CRT statically so the zip runs without the VC++ redistributable.
 set_property(TARGET Outatime PROPERTY
