@@ -4,8 +4,8 @@
 
 #include "resource.h"
 
-// English is neutral so it is the fallback for any other UI language.
-LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
+// Not LANG_NEUTRAL: LoadString takes a neutral string over the one for the UI language.
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 STRINGTABLE
 BEGIN
     IDS_MENU_SETTINGS "&Settings..."
