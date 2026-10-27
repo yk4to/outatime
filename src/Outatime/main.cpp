@@ -65,16 +65,18 @@ void ReloadSettings() {
     }
 }
 
-void OnAltTap(Mode mode, AltKey key) {
+// `foreground` is the window that was in front when the Alt key was released.
+void OnAltTap(Mode mode, AltKey key, HWND foreground) {
     switch (mode) {
     case Mode::Toggle:
         if (key == AltKey::Left) {
-            outatime::ime::Apply(outatime::ime::Action::Toggle);
+            outatime::ime::Apply(outatime::ime::Action::Toggle, foreground);
         }
         break;
     case Mode::LeftOffRightOn:
-        outatime::ime::Apply(key == AltKey::Left ? outatime::ime::Action::Off
-                                                 : outatime::ime::Action::On);
+        outatime::ime::Apply(
+            key == AltKey::Left ? outatime::ime::Action::Off : outatime::ime::Action::On,
+            foreground);
         break;
     case Mode::Disabled:
         break;
@@ -174,7 +176,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         return 0;
 
     case WM_ALT_TAP:
-        OnAltTap(g_settings.mode, static_cast<AltKey>(wParam));
+        OnAltTap(g_settings.mode, static_cast<AltKey>(wParam), reinterpret_cast<HWND>(lParam));
         return 0;
 
     case WM_TIMER:

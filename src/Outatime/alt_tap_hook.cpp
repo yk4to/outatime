@@ -124,7 +124,8 @@ LRESULT CALLBACK KeyboardProc(int code, WPARAM wParam, LPARAM lParam) {
             // fall back to a plain Alt press.
             if (!AnyMouseButtonDown() && ReplayMaskedAltUp(vk)) {
                 PostMessageW(g_target, g_message,
-                             static_cast<WPARAM>(vk == VK_LMENU ? AltKey::Left : AltKey::Right), 0);
+                             static_cast<WPARAM>(vk == VK_LMENU ? AltKey::Left : AltKey::Right),
+                             reinterpret_cast<LPARAM>(GetForegroundWindow()));
                 return 1;
             }
         }

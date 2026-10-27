@@ -11,6 +11,7 @@ add_executable(Outatime WIN32
     main.cpp
     alt_tap_hook.cpp
     ime.cpp
+    diagnostics.cpp
     settings.cpp
     Outatime.manifest
 )

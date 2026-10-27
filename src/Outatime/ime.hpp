@@ -1,5 +1,7 @@
 #pragma once
 
+#include <windows.h>
+
 namespace outatime::ime {
 
 enum class Action {
@@ -8,7 +10,8 @@ enum class Action {
     Off,
 };
 
-// Changes the IME open state of the window that has keyboard focus.
-void Apply(Action action);
+// Changes the IME open state of the focused window in `foreground`'s thread,
+// then reads it back. Failures are written to the diagnostics log.
+void Apply(Action action, HWND foreground);
 
 }  // namespace outatime::ime
