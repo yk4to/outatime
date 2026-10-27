@@ -11,16 +11,11 @@
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="48" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <Grid x:Name="AppTitleBar" Padding="16,0,0,0">
-            <TextBlock
-                x:Name="AppTitleText"
-                VerticalAlignment="Center"
-                Style="{StaticResource CaptionTextBlockStyle}" />
-        </Grid>
+        <TitleBar x:Name="AppTitleBar" />
 
         <ScrollViewer Grid.Row="1">
             <StackPanel

@@ -34,7 +34,7 @@ public sealed partial class MainWindow : Window
         InitializeComponent();
 
         Title = _resources.GetString("AppTitle");
-        AppTitleText.Text = Title;
+        AppTitleBar.Title = Title;
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(AppTitleBar);
 
