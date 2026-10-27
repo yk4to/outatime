@@ -4,7 +4,12 @@
 
 #include <string>
 
+#include "alt_tap_hook.hpp"
+#include "ime.hpp"
+
 namespace {
+
+using outatime::AltKey;
 
 constexpr wchar_t kWindowClass[] = L"Outatime.Resident";
 constexpr wchar_t kMutexName[] = L"Local\\Outatime.Resident";
@@ -12,14 +17,44 @@ constexpr wchar_t kAppName[] = L"Outatime";
 
 constexpr UINT kTrayIconId = 1;
 constexpr UINT WM_TRAYICON = WM_APP + 1;
+constexpr UINT WM_ALT_TAP = WM_APP + 2;
 
 enum MenuId : UINT {
     kMenuSettings = 1,
     kMenuExit,
 };
 
+enum class Mode {
+    Toggle,          // Left Alt toggles the IME
+    LeftOffRightOn,  // Left Alt turns it off, Right Alt turns it on
+    Disabled,
+};
+
+// TODO: Read from settings.json.
+constexpr Mode kMode = Mode::Toggle;
+
 // Broadcast by Explorer when the taskbar is (re)created, e.g. after Explorer restarts.
 UINT g_taskbarCreatedMsg = 0;
+
+void ApplyMode(Mode mode) {
+    outatime::SetAltTapKeys(mode != Mode::Disabled, mode == Mode::LeftOffRightOn);
+}
+
+void OnAltTap(Mode mode, AltKey key) {
+    switch (mode) {
+    case Mode::Toggle:
+        if (key == AltKey::Left) {
+            outatime::ime::Apply(outatime::ime::Action::Toggle);
+        }
+        break;
+    case Mode::LeftOffRightOn:
+        outatime::ime::Apply(key == AltKey::Left ? outatime::ime::Action::Off
+                                                 : outatime::ime::Action::On);
+        break;
+    case Mode::Disabled:
+        break;
+    }
+}
 
 bool AddTrayIcon(HWND hwnd) {
     NOTIFYICONDATAW nid{};
@@ -100,6 +135,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         }
         return 0;
 
+    case WM_ALT_TAP:
+        OnAltTap(kMode, static_cast<AltKey>(wParam));
+        return 0;
+
     case WM_COMMAND:
         switch (LOWORD(wParam)) {
         case kMenuSettings:
@@ -145,8 +184,8 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int) {
 
     // A hidden top-level window (not message-only) so it receives TaskbarCreated
     // broadcasts and can be found by the settings app with FindWindow.
-    HWND hwnd = CreateWindowExW(0, kWindowClass, kAppName, WS_OVERLAPPED,
-                                0, 0, 0, 0, nullptr, nullptr, instance, nullptr);
+    HWND hwnd = CreateWindowExW(0, kWindowClass, kAppName, WS_OVERLAPPED, 0, 0, 0, 0, nullptr,
+                                nullptr, instance, nullptr);
     if (!hwnd) {
         return 1;
     }
@@ -154,12 +193,20 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int) {
     // Let Explorer reach us even when we run elevated.
     ChangeWindowMessageFilterEx(hwnd, g_taskbarCreatedMsg, MSGFLT_ALLOW, nullptr);
 
+    ApplyMode(kMode);
+    if (!outatime::StartAltTapHook(hwnd, WM_ALT_TAP)) {
+        MessageBoxW(nullptr, L"Failed to install the keyboard hook.", kAppName,
+                    MB_OK | MB_ICONERROR);
+        DestroyWindow(hwnd);
+    }
+
     MSG msg{};
     while (GetMessageW(&msg, nullptr, 0, 0) > 0) {
         TranslateMessage(&msg);
         DispatchMessageW(&msg);
     }
 
+    outatime::StopAltTapHook();
     CloseHandle(mutex);
     return static_cast<int>(msg.wParam);
 }
