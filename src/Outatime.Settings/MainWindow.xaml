@@ -32,6 +32,18 @@
                     Margin="0,0,0,20"
                     Style="{StaticResource TitleTextBlockStyle}" />
 
+                <!-- Settings only take effect while the resident process runs. -->
+                <InfoBar
+                    x:Name="NotRunningInfoBar"
+                    x:Uid="NotRunningInfoBar"
+                    Margin="0,0,0,8"
+                    IsClosable="False"
+                    Severity="Warning">
+                    <InfoBar.ActionButton>
+                        <Button x:Name="StartButton" x:Uid="StartButton" Click="StartButton_Click" />
+                    </InfoBar.ActionButton>
+                </InfoBar>
+
                 <controls:SettingsCard x:Uid="ModeCard">
                     <controls:SettingsCard.HeaderIcon>
                         <FontIcon Glyph="&#xE765;" />
@@ -64,6 +76,13 @@
                         <Button x:Name="RestartButton" x:Uid="RestartButton" Click="RestartButton_Click" />
                     </InfoBar.ActionButton>
                 </InfoBar>
+
+                <controls:SettingsCard x:Name="SettingsFileCard" x:Uid="SettingsFileCard">
+                    <controls:SettingsCard.HeaderIcon>
+                        <FontIcon Glyph="&#xE8A5;" />
+                    </controls:SettingsCard.HeaderIcon>
+                    <Button x:Uid="OpenSettingsFileButton" Click="OpenSettingsFileButton_Click" />
+                </controls:SettingsCard>
 
                 <TextBlock
                     x:Uid="AboutHeader"

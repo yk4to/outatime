@@ -20,6 +20,16 @@
     <value>Settings</value>
   </data>
 
+  <data name="NotRunningInfoBar.Title" xml:space="preserve">
+    <value>Outatime isn't running</value>
+  </data>
+  <data name="NotRunningInfoBar.Message" xml:space="preserve">
+    <value>Start it to switch the IME with the Alt keys.</value>
+  </data>
+  <data name="StartButton.Content" xml:space="preserve">
+    <value>Start</value>
+  </data>
+
   <data name="ModeCard.Header" xml:space="preserve">
     <value>Alt key behavior</value>
   </data>
@@ -65,6 +75,13 @@
     <value>Restart</value>
   </data>
 
+  <data name="SettingsFileCard.Header" xml:space="preserve">
+    <value>Settings file</value>
+  </data>
+  <data name="OpenSettingsFileButton.Content" xml:space="preserve">
+    <value>Open</value>
+  </data>
+
   <data name="AboutHeader.Text" xml:space="preserve">
     <value>About</value>
   </data>
@@ -80,6 +97,12 @@
   </data>
   <data name="StartupErrorTitle" xml:space="preserve">
     <value>Couldn't change the startup setting</value>
+  </data>
+  <data name="StartErrorTitle" xml:space="preserve">
+    <value>Couldn't start Outatime</value>
+  </data>
+  <data name="OpenSettingsFileErrorTitle" xml:space="preserve">
+    <value>Couldn't open the settings file</value>
   </data>
   <data name="RestartErrorTitle" xml:space="preserve">
     <value>Couldn't restart Outatime</value>

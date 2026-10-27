@@ -17,6 +17,8 @@ using outatime::Mode;
 constexpr wchar_t kWindowClass[] = L"Outatime.Resident";
 constexpr wchar_t kMutexName[] = L"Local\\Outatime.Resident";
 constexpr wchar_t kElevatedProperty[] = L"Outatime.Elevated";
+// Set by the settings app on its window (MainWindow.xaml.cs).
+constexpr wchar_t kSettingsWindowProperty[] = L"Outatime.Settings";
 constexpr wchar_t kAppName[] = L"Outatime";
 
 constexpr UINT kTrayIconId = 1;
@@ -122,6 +124,19 @@ void OpenSettings(HWND hwnd) {
     }
 }
 
+// Exiting from the tray quits all of Outatime, so close the settings app too.
+// Other exits (a restart from the settings app) leave it open.
+void CloseSettingsWindows() {
+    EnumWindows(
+        [](HWND window, LPARAM) -> BOOL {
+            if (GetPropW(window, kSettingsWindowProperty)) {
+                PostMessageW(window, WM_CLOSE, 0, 0);
+            }
+            return TRUE;
+        },
+        0);
+}
+
 void ShowTrayMenu(HWND hwnd, POINT pt) {
     HMENU menu = CreatePopupMenu();
     AppendMenuW(menu, MF_STRING, kMenuSettings, L"&Settings...");
@@ -176,6 +191,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
             OpenSettings(hwnd);
             return 0;
         case kMenuExit:
+            CloseSettingsWindows();
             DestroyWindow(hwnd);
             return 0;
         }

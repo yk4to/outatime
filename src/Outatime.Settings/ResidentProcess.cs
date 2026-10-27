@@ -34,7 +34,11 @@ internal static partial class ResidentProcess
         {
             throw new TimeoutException("Outatime did not exit.");
         }
+        await StartAsync(elevated);
+    }
 
+    public static async Task StartAsync(bool elevated)
+    {
         if (elevated)
         {
             await StartupManager.RunTaskAsync();
