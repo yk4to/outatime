@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <data name="AppTitle" xml:space="preserve">
+    <value>Outatime 설정</value>
+  </data>
+  <data name="SettingsTitle.Text" xml:space="preserve">
+    <value>설정</value>
+  </data>
+  <data name="NotRunningInfoBar.Title" xml:space="preserve">
+    <value>Outatime이 실행되고 있지 않습니다</value>
+  </data>
+  <data name="NotRunningInfoBar.Message" xml:space="preserve">
+    <value>Alt 키로 IME를 전환하려면 Outatime을 시작하세요.</value>
+  </data>
+  <data name="StartButton.Content" xml:space="preserve">
+    <value>시작</value>
+  </data>
+  <data name="ModeCard.Header" xml:space="preserve">
+    <value>Alt 키 동작</value>
+  </data>
+  <data name="ModeCard.Description" xml:space="preserve">
+    <value>Alt 키만 단독으로 눌렀을 때의 동작</value>
+  </data>
+  <data name="ModeToggle.Content" xml:space="preserve">
+    <value>왼쪽 Alt 키로 IME 전환</value>
+  </data>
+  <data name="ModeLeftOffRightOn.Content" xml:space="preserve">
+    <value>왼쪽 Alt 키로 IME 끄기, 오른쪽 Alt 키로 켜기</value>
+  </data>
+  <data name="ModeDisabled.Content" xml:space="preserve">
+    <value>아무 작업도 하지 않음</value>
+  </data>
+  <data name="StartupCard.Header" xml:space="preserve">
+    <value>로그인할 때 시작</value>
+  </data>
+  <data name="StartupCard.Description" xml:space="preserve">
+    <value>관리자 권한으로 실행하면 관리자 권한으로 실행 중인 앱에서도 IME를 전환할 수 있습니다</value>
+  </data>
+  <data name="StartupOff.Content" xml:space="preserve">
+    <value>끄기</value>
+  </data>
+  <data name="StartupNormal.Content" xml:space="preserve">
+    <value>켜기</value>
+  </data>
+  <data name="StartupElevated.Content" xml:space="preserve">
+    <value>켜기(관리자 권한으로 실행)</value>
+  </data>
+  <data name="RestartElevatedTitle" xml:space="preserve">
+    <value>Outatime이 관리자 권한으로 실행되고 있지 않습니다</value>
+  </data>
+  <data name="RestartNormalTitle" xml:space="preserve">
+    <value>Outatime이 관리자 권한으로 실행되고 있습니다</value>
+  </data>
+  <data name="RestartMessage" xml:space="preserve">
+    <value>이 설정을 바로 적용하려면 다시 시작하세요.</value>
+  </data>
+  <data name="RestartButton.Content" xml:space="preserve">
+    <value>다시 시작</value>
+  </data>
+  <data name="SettingsFileCard.Header" xml:space="preserve">
+    <value>설정 파일</value>
+  </data>
+  <data name="OpenSettingsFileButton.Content" xml:space="preserve">
+    <value>열기</value>
+  </data>
+  <data name="AboutHeader.Text" xml:space="preserve">
+    <value>정보</value>
+  </data>
+  <data name="AboutCard.Header" xml:space="preserve">
+    <value>Outatime</value>
+  </data>
+  <data name="AboutVersion" xml:space="preserve">
+    <value>버전 {0}</value>
+  </data>
+  <data name="SaveErrorTitle" xml:space="preserve">
+    <value>설정을 저장할 수 없습니다</value>
+  </data>
+  <data name="StartupErrorTitle" xml:space="preserve">
+    <value>시작 설정을 변경할 수 없습니다</value>
+  </data>
+  <data name="StartErrorTitle" xml:space="preserve">
+    <value>Outatime을 시작할 수 없습니다</value>
+  </data>
+  <data name="OpenSettingsFileErrorTitle" xml:space="preserve">
+    <value>설정 파일을 열 수 없습니다</value>
+  </data>
+  <data name="RestartErrorTitle" xml:space="preserve">
+    <value>Outatime을 다시 시작할 수 없습니다</value>
+  </data>
+  <data name="ResidentExitTimeout" xml:space="preserve">
+    <value>Outatime이 종료되지 않았습니다.</value>
+  </data>
+  <data name="ResidentStartTimeout" xml:space="preserve">
+    <value>Outatime이 시작되지 않았습니다.</value>
+  </data>
+  <data name="SchtasksFailed" xml:space="preserve">
+    <value>작업 스케줄러에서 오류가 발생했습니다(종료 코드 {0}).</value>
+  </data>
+  <data name="ErrorDialogClose" xml:space="preserve">
+    <value>확인</value>
+  </data>
+</root>

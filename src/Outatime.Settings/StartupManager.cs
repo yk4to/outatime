@@ -4,6 +4,7 @@ using System.Security;
 using System.Security.Principal;
 using System.Text;
 using Microsoft.Win32;
+using Microsoft.Windows.ApplicationModel.Resources;
 
 namespace Outatime.Settings;
 
@@ -20,6 +21,8 @@ internal static class StartupManager
 {
     private const string Name = "Outatime";
     private const string RunKeyPath = @"Software\Microsoft\Windows\CurrentVersion\Run";
+
+    private static readonly ResourceLoader Resources = new();
 
     // Distribution layout: Outatime.exe + settings\Outatime.Settings.exe
     public static string ResidentPath =>
@@ -67,7 +70,8 @@ internal static class StartupManager
         await process.WaitForExitAsync();
         if (process.ExitCode != 0)
         {
-            throw new InvalidOperationException($"schtasks.exe exited with code {process.ExitCode}.");
+            throw new InvalidOperationException(
+                string.Format(Resources.GetString("SchtasksFailed"), process.ExitCode));
         }
     }
 
@@ -114,7 +118,8 @@ internal static class StartupManager
         await process.WaitForExitAsync();
         if (process.ExitCode != 0)
         {
-            throw new InvalidOperationException($"schtasks.exe exited with code {process.ExitCode}.");
+            throw new InvalidOperationException(
+                string.Format(Resources.GetString("SchtasksFailed"), process.ExitCode));
         }
     }
 

@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using Microsoft.Windows.ApplicationModel.Resources;
 
 namespace Outatime.Settings;
 
@@ -14,6 +15,7 @@ internal static partial class ResidentProcess
     private const uint WmClose = 0x0010;
 
     private static readonly TimeSpan Timeout = TimeSpan.FromSeconds(5);
+    private static readonly ResourceLoader Resources = new();
 
     // Whether the resident runs as administrator, or null if it is not running.
     public static bool? IsElevated()
@@ -32,7 +34,7 @@ internal static partial class ResidentProcess
         // A new instance exits right away while the old one still holds the mutex.
         if (!await WaitUntilAsync(() => !MutexExists()))
         {
-            throw new TimeoutException("Outatime did not exit.");
+            throw new TimeoutException(Resources.GetString("ResidentExitTimeout"));
         }
         await StartAsync(elevated);
     }
@@ -50,7 +52,7 @@ internal static partial class ResidentProcess
         }
         if (!await WaitUntilAsync(() => FindWindowW(WindowClass, null) != 0))
         {
-            throw new TimeoutException("Outatime did not start.");
+            throw new TimeoutException(Resources.GetString("ResidentStartTimeout"));
         }
     }
 

@@ -13,6 +13,7 @@ add_executable(Outatime WIN32
     ime.cpp
     diagnostics.cpp
     settings.cpp
+    Outatime.rc
     Outatime.manifest
 )
 

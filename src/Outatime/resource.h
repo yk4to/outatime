@@ -1,0 +1,6 @@
+#pragma once
+
+#define IDS_MENU_SETTINGS 101
+#define IDS_MENU_EXIT 102
+#define IDS_SETTINGS_NOT_FOUND 103
+#define IDS_HOOK_FAILED 104
