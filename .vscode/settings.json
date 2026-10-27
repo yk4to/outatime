@@ -1,0 +1,4 @@
+{
+  // clangd provides IntelliSense; cpptools stays for debugging only.
+  "C_Cpp.intelliSenseEngine": "disabled"
+}
