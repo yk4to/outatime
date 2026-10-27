@@ -43,6 +43,22 @@
   <data name="ModeDisabled.Content" xml:space="preserve">
     <value>何もしない</value>
   </data>
+
+  <data name="FullScreenCard.Header" xml:space="preserve">
+    <value>全画面アプリで一時停止</value>
+  </data>
+  <data name="FullScreenCard.Description" xml:space="preserve">
+    <value>ゲームで Alt キーを通常どおり使えるようにします。「すべての全画面アプリ」は、Windows が全画面と判断したほかのアプリも対象です。</value>
+  </data>
+  <data name="FullScreenOff.Content" xml:space="preserve">
+    <value>オフ</value>
+  </data>
+  <data name="FullScreenGames.Content" xml:space="preserve">
+    <value>全画面のゲームのみ</value>
+  </data>
+  <data name="FullScreenAll.Content" xml:space="preserve">
+    <value>すべての全画面アプリ</value>
+  </data>
   <data name="StartupCard.Header" xml:space="preserve">
     <value>サインイン時に起動</value>
   </data>

@@ -1,4 +1,5 @@
 #include <windows.h>
+#include <commctrl.h>
 #include <shellapi.h>
 #include <windowsx.h>
 
@@ -12,6 +13,7 @@
 namespace {
 
 using outatime::AltKey;
+using outatime::FullScreenPause;
 using outatime::Mode;
 
 // The settings app uses these names too (ResidentProcess.cs).
@@ -28,6 +30,7 @@ constexpr UINT WM_ALT_TAP = WM_APP + 2;
 
 enum MenuId : UINT {
     kMenuSettings = 1,
+    kMenuPause,
     kMenuExit,
 };
 
@@ -36,10 +39,28 @@ enum MenuId : UINT {
 constexpr UINT_PTR kReloadTimerId = 1;
 constexpr UINT kReloadDelayMs = 200;
 
+// Foreground changes are reported right away, but an app can also go full screen
+// in place (e.g. F11), so the full-screen state is polled too.
+constexpr UINT_PTR kStatusTimerId = 2;
+constexpr UINT kStatusIntervalMs = 1000;
+
+// Whether Alt taps switch the IME right now, shown by the tray icon and tooltip.
+enum class Status {
+    Active,
+    Paused,            // From the tray menu
+    PausedFullScreen,  // A full-screen app is in front
+    Off,               // Mode is "disabled" in the settings
+};
+
 // Broadcast by Explorer when the taskbar is (re)created, e.g. after Explorer restarts.
 UINT g_taskbarCreatedMsg = 0;
 
+HWND g_hwnd = nullptr;
 outatime::Settings g_settings;
+bool g_pausedFromMenu = false;
+Status g_status = Status::Active;
+HICON g_activeIcon = nullptr;
+HICON g_pausedIcon = nullptr;
 
 bool IsElevated() {
     HANDLE token = nullptr;
@@ -54,15 +75,111 @@ bool IsElevated() {
     return ok && elevation.TokenIsElevated;
 }
 
-void ApplyMode(Mode mode) {
-    outatime::SetAltTapKeys(mode != Mode::Disabled, mode == Mode::LeftOffRightOn);
+// Picks the string for the user's UI language from Outatime.rc.
+std::wstring LoadResourceString(UINT id) {
+    const wchar_t* text = nullptr;
+    const int length =
+        LoadStringW(GetModuleHandleW(nullptr), id, reinterpret_cast<LPWSTR>(&text), 0);
+    return std::wstring(text, length > 0 ? length : 0);
+}
+
+// "Games" is the same check as PowerToys' game mode detection. Like PowerToys,
+// this trusts the shell rather than checking whether a window covers the
+// monitor: that would also pause in full-screen browsers and editors, where
+// switching the IME is still wanted.
+bool IsFullScreenAppInFront(FullScreenPause setting) {
+    if (setting == FullScreenPause::Off) {
+        return false;
+    }
+    QUERY_USER_NOTIFICATION_STATE state;
+    if (FAILED(SHQueryUserNotificationState(&state))) {
+        return false;
+    }
+    return state == QUNS_RUNNING_D3D_FULL_SCREEN ||
+           (setting == FullScreenPause::All && state == QUNS_BUSY);
+}
+
+Status CurrentStatus() {
+    if (g_settings.mode == Mode::Disabled) {
+        return Status::Off;
+    }
+    if (g_pausedFromMenu) {
+        return Status::Paused;
+    }
+    if (IsFullScreenAppInFront(g_settings.pauseInFullScreen)) {
+        return Status::PausedFullScreen;
+    }
+    return Status::Active;
+}
+
+// Fills the parts of the tray icon that reflect g_status.
+void FillTrayIconData(NOTIFYICONDATAW& nid, HWND hwnd) {
+    nid.cbSize = sizeof(nid);
+    nid.hWnd = hwnd;
+    nid.uID = kTrayIconId;
+    nid.uFlags = NIF_ICON | NIF_TIP | NIF_SHOWTIP;
+    nid.hIcon = g_status == Status::Active ? g_activeIcon : g_pausedIcon;
+
+    std::wstring tip = kAppName;
+    switch (g_status) {
+    case Status::Active:
+        break;
+    case Status::Paused:
+        tip = LoadResourceString(IDS_TIP_PAUSED);
+        break;
+    case Status::PausedFullScreen:
+        tip = LoadResourceString(IDS_TIP_FULL_SCREEN);
+        break;
+    case Status::Off:
+        tip = LoadResourceString(IDS_TIP_OFF);
+        break;
+    }
+    wcsncpy_s(nid.szTip, tip.c_str(), _TRUNCATE);
+}
+
+bool AddTrayIcon(HWND hwnd) {
+    NOTIFYICONDATAW nid{};
+    FillTrayIconData(nid, hwnd);
+    nid.uFlags |= NIF_MESSAGE;
+    nid.uCallbackMessage = WM_TRAYICON;
+    if (!Shell_NotifyIconW(NIM_ADD, &nid)) {
+        return false;
+    }
+    nid.uVersion = NOTIFYICON_VERSION_4;
+    return Shell_NotifyIconW(NIM_SETVERSION, &nid) != FALSE;
+}
+
+void RemoveTrayIcon(HWND hwnd) {
+    NOTIFYICONDATAW nid{};
+    nid.cbSize = sizeof(nid);
+    nid.hWnd = hwnd;
+    nid.uID = kTrayIconId;
+    Shell_NotifyIconW(NIM_DELETE, &nid);
+}
+
+// Re-evaluates whether Alt taps should switch the IME, and tells the hook and
+// the tray icon. A paused hook lets Alt through untouched, so games get it as is.
+void UpdateStatus() {
+    const Status status = CurrentStatus();
+    const bool active = status == Status::Active;
+    outatime::SetAltTapKeys(active, active && g_settings.mode == Mode::LeftOffRightOn);
+    if (status != g_status) {
+        g_status = status;
+        NOTIFYICONDATAW nid{};
+        FillTrayIconData(nid, g_hwnd);
+        Shell_NotifyIconW(NIM_MODIFY, &nid);
+    }
+}
+
+void CALLBACK OnForegroundChanged(HWINEVENTHOOK, DWORD, HWND, LONG, LONG, DWORD, DWORD) {
+    UpdateStatus();
 }
 
 // Keeps the current settings if the file is unreadable, e.g. while being edited.
 void ReloadSettings() {
     if (const auto settings = outatime::LoadSettings()) {
         g_settings = *settings;
-        ApplyMode(g_settings.mode);
+        UpdateStatus();
     }
 }
 
@@ -82,39 +199,6 @@ void OnAltTap(Mode mode, AltKey key, HWND foreground) {
     case Mode::Disabled:
         break;
     }
-}
-
-bool AddTrayIcon(HWND hwnd) {
-    NOTIFYICONDATAW nid{};
-    nid.cbSize = sizeof(nid);
-    nid.hWnd = hwnd;
-    nid.uID = kTrayIconId;
-    nid.uFlags = NIF_ICON | NIF_MESSAGE | NIF_TIP | NIF_SHOWTIP;
-    nid.uCallbackMessage = WM_TRAYICON;
-    // TODO: Replace with app icons that follow the taskbar light/dark theme.
-    nid.hIcon = LoadIconW(nullptr, IDI_APPLICATION);
-    wcscpy_s(nid.szTip, kAppName);
-    if (!Shell_NotifyIconW(NIM_ADD, &nid)) {
-        return false;
-    }
-    nid.uVersion = NOTIFYICON_VERSION_4;
-    return Shell_NotifyIconW(NIM_SETVERSION, &nid) != FALSE;
-}
-
-void RemoveTrayIcon(HWND hwnd) {
-    NOTIFYICONDATAW nid{};
-    nid.cbSize = sizeof(nid);
-    nid.hWnd = hwnd;
-    nid.uID = kTrayIconId;
-    Shell_NotifyIconW(NIM_DELETE, &nid);
-}
-
-// Picks the string for the user's UI language from Outatime.rc.
-std::wstring LoadResourceString(UINT id) {
-    const wchar_t* text = nullptr;
-    const int length =
-        LoadStringW(GetModuleHandleW(nullptr), id, reinterpret_cast<LPWSTR>(&text), 0);
-    return std::wstring(text, length > 0 ? length : 0);
 }
 
 std::wstring ExeDirectory() {
@@ -151,6 +235,8 @@ void CloseSettingsWindows() {
 void ShowTrayMenu(HWND hwnd, POINT pt) {
     HMENU menu = CreatePopupMenu();
     AppendMenuW(menu, MF_STRING, kMenuSettings, LoadResourceString(IDS_MENU_SETTINGS).c_str());
+    AppendMenuW(menu, MF_STRING | (g_pausedFromMenu ? MF_CHECKED : MF_UNCHECKED), kMenuPause,
+                LoadResourceString(IDS_MENU_PAUSE).c_str());
     AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(menu, MF_STRING, kMenuExit, LoadResourceString(IDS_MENU_EXIT).c_str());
     SetMenuDefaultItem(menu, kMenuSettings, FALSE);
@@ -194,12 +280,20 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
             ReloadSettings();
             return 0;
         }
+        if (wParam == kStatusTimerId) {
+            UpdateStatus();
+            return 0;
+        }
         break;
 
     case WM_COMMAND:
         switch (LOWORD(wParam)) {
         case kMenuSettings:
             OpenSettings(hwnd);
+            return 0;
+        case kMenuPause:
+            g_pausedFromMenu = !g_pausedFromMenu;
+            UpdateStatus();
             return 0;
         case kMenuExit:
             CloseSettingsWindows();
@@ -236,6 +330,12 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int) {
 
     g_taskbarCreatedMsg = RegisterWindowMessageW(L"TaskbarCreated");
 
+    // Loaded before the window so WM_CREATE adds the tray icon in the right state.
+    g_settings = outatime::LoadSettings().value_or(outatime::Settings{});
+    g_status = CurrentStatus();
+    LoadIconMetric(instance, MAKEINTRESOURCEW(IDI_APP), LIM_SMALL, &g_activeIcon);
+    LoadIconMetric(instance, MAKEINTRESOURCEW(IDI_PAUSED), LIM_SMALL, &g_pausedIcon);
+
     WNDCLASSEXW wc{};
     wc.cbSize = sizeof(wc);
     wc.lpfnWndProc = WndProc;
@@ -245,27 +345,31 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int) {
 
     // A hidden top-level window (not message-only) so it receives TaskbarCreated broadcasts
     // and the settings app can find it with FindWindow.
-    HWND hwnd = CreateWindowExW(0, kWindowClass, kAppName, WS_OVERLAPPED, 0, 0, 0, 0, nullptr,
-                                nullptr, instance, nullptr);
-    if (!hwnd) {
+    g_hwnd = CreateWindowExW(0, kWindowClass, kAppName, WS_OVERLAPPED, 0, 0, 0, 0, nullptr, nullptr,
+                             instance, nullptr);
+    if (!g_hwnd) {
         return 1;
     }
 
     // Tell the settings app whether we run elevated, and let it close us (to restart
     // with the other privilege level) and Explorer reach us even when we do.
     if (IsElevated()) {
-        SetPropW(hwnd, kElevatedProperty, reinterpret_cast<HANDLE>(1));
+        SetPropW(g_hwnd, kElevatedProperty, reinterpret_cast<HANDLE>(1));
     }
-    ChangeWindowMessageFilterEx(hwnd, WM_CLOSE, MSGFLT_ALLOW, nullptr);
-    ChangeWindowMessageFilterEx(hwnd, g_taskbarCreatedMsg, MSGFLT_ALLOW, nullptr);
+    ChangeWindowMessageFilterEx(g_hwnd, WM_CLOSE, MSGFLT_ALLOW, nullptr);
+    ChangeWindowMessageFilterEx(g_hwnd, g_taskbarCreatedMsg, MSGFLT_ALLOW, nullptr);
 
-    g_settings = outatime::LoadSettings().value_or(outatime::Settings{});
-    ApplyMode(g_settings.mode);
-    if (!outatime::StartAltTapHook(hwnd, WM_ALT_TAP)) {
+    UpdateStatus();
+    if (!outatime::StartAltTapHook(g_hwnd, WM_ALT_TAP)) {
         MessageBoxW(nullptr, LoadResourceString(IDS_HOOK_FAILED).c_str(), kAppName,
                     MB_OK | MB_ICONERROR);
-        DestroyWindow(hwnd);
+        DestroyWindow(g_hwnd);
     }
+
+    HWINEVENTHOOK foregroundHook =
+        SetWinEventHook(EVENT_SYSTEM_FOREGROUND, EVENT_SYSTEM_FOREGROUND, nullptr,
+                        OnForegroundChanged, 0, 0, WINEVENT_OUTOFCONTEXT);
+    SetTimer(g_hwnd, kStatusTimerId, kStatusIntervalMs, nullptr);
 
     // Watch the settings directory so edits apply without a restart.
     const auto settingsDir = outatime::SettingsDirectory();
@@ -280,7 +384,7 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int) {
         const DWORD result = MsgWaitForMultipleObjectsEx(watchCount, &watch, INFINITE, QS_ALLINPUT,
                                                          MWMO_INPUTAVAILABLE);
         if (watchCount == 1 && result == WAIT_OBJECT_0) {
-            SetTimer(hwnd, kReloadTimerId, kReloadDelayMs, nullptr);
+            SetTimer(g_hwnd, kReloadTimerId, kReloadDelayMs, nullptr);
             FindNextChangeNotification(watch);
             continue;
         }
@@ -301,7 +405,12 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int) {
     if (watch != INVALID_HANDLE_VALUE) {
         FindCloseChangeNotification(watch);
     }
+    if (foregroundHook) {
+        UnhookWinEvent(foregroundHook);
+    }
     outatime::StopAltTapHook();
+    DestroyIcon(g_activeIcon);
+    DestroyIcon(g_pausedIcon);
     CloseHandle(mutex);
     return static_cast<int>(msg.wParam);
 }

@@ -43,6 +43,22 @@
   <data name="ModeDisabled.Content" xml:space="preserve">
     <value>아무 작업도 하지 않음</value>
   </data>
+
+  <data name="FullScreenCard.Header" xml:space="preserve">
+    <value>전체 화면 앱에서 일시 중지</value>
+  </data>
+  <data name="FullScreenCard.Description" xml:space="preserve">
+    <value>게임에서 Alt 키를 평소처럼 사용할 수 있게 합니다. '모든 전체 화면 앱'은 Windows가 전체 화면으로 판단한 다른 앱도 포함합니다.</value>
+  </data>
+  <data name="FullScreenOff.Content" xml:space="preserve">
+    <value>끄기</value>
+  </data>
+  <data name="FullScreenGames.Content" xml:space="preserve">
+    <value>전체 화면 게임만</value>
+  </data>
+  <data name="FullScreenAll.Content" xml:space="preserve">
+    <value>모든 전체 화면 앱</value>
+  </data>
   <data name="StartupCard.Header" xml:space="preserve">
     <value>로그인할 때 시작</value>
   </data>

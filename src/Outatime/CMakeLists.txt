@@ -26,7 +26,7 @@ target_compile_definitions(Outatime PRIVATE
 
 target_compile_options(Outatime PRIVATE /W4 /permissive- /utf-8)
 
-target_link_libraries(Outatime PRIVATE user32 shell32 imm32 ole32 advapi32 nlohmann_json::nlohmann_json)
+target_link_libraries(Outatime PRIVATE user32 shell32 imm32 ole32 advapi32 comctl32 nlohmann_json::nlohmann_json)
 
 # Same layout as the zip: Outatime.exe + settings\Outatime.Settings.exe
 set_property(TARGET Outatime PROPERTY
