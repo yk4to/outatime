@@ -6,10 +6,12 @@
 
 #include "alt_tap_hook.hpp"
 #include "ime.hpp"
+#include "settings.hpp"
 
 namespace {
 
 using outatime::AltKey;
+using outatime::Mode;
 
 constexpr wchar_t kWindowClass[] = L"Outatime.Resident";
 constexpr wchar_t kMutexName[] = L"Local\\Outatime.Resident";
@@ -24,20 +26,26 @@ enum MenuId : UINT {
     kMenuExit,
 };
 
-enum class Mode {
-    Toggle,          // Left Alt toggles the IME
-    LeftOffRightOn,  // Left Alt turns it off, Right Alt turns it on
-    Disabled,
-};
-
-// TODO: Read from settings.json.
-constexpr Mode kMode = Mode::Toggle;
+// Editors and the settings app may write the file in several steps, so wait
+// for changes to settle before reloading.
+constexpr UINT_PTR kReloadTimerId = 1;
+constexpr UINT kReloadDelayMs = 200;
 
 // Broadcast by Explorer when the taskbar is (re)created, e.g. after Explorer restarts.
 UINT g_taskbarCreatedMsg = 0;
 
+outatime::Settings g_settings;
+
 void ApplyMode(Mode mode) {
     outatime::SetAltTapKeys(mode != Mode::Disabled, mode == Mode::LeftOffRightOn);
+}
+
+// Keeps the current settings if the file is unreadable, e.g. while being edited.
+void ReloadSettings() {
+    if (const auto settings = outatime::LoadSettings()) {
+        g_settings = *settings;
+        ApplyMode(g_settings.mode);
+    }
 }
 
 void OnAltTap(Mode mode, AltKey key) {
@@ -136,8 +144,16 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         return 0;
 
     case WM_ALT_TAP:
-        OnAltTap(kMode, static_cast<AltKey>(wParam));
+        OnAltTap(g_settings.mode, static_cast<AltKey>(wParam));
         return 0;
+
+    case WM_TIMER:
+        if (wParam == kReloadTimerId) {
+            KillTimer(hwnd, kReloadTimerId);
+            ReloadSettings();
+            return 0;
+        }
+        break;
 
     case WM_COMMAND:
         switch (LOWORD(wParam)) {
@@ -182,8 +198,7 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int) {
     wc.lpszClassName = kWindowClass;
     RegisterClassExW(&wc);
 
-    // A hidden top-level window (not message-only) so it receives TaskbarCreated
-    // broadcasts and can be found by the settings app with FindWindow.
+    // A hidden top-level window (not message-only) so it receives TaskbarCreated broadcasts.
     HWND hwnd = CreateWindowExW(0, kWindowClass, kAppName, WS_OVERLAPPED, 0, 0, 0, 0, nullptr,
                                 nullptr, instance, nullptr);
     if (!hwnd) {
@@ -193,19 +208,48 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int) {
     // Let Explorer reach us even when we run elevated.
     ChangeWindowMessageFilterEx(hwnd, g_taskbarCreatedMsg, MSGFLT_ALLOW, nullptr);
 
-    ApplyMode(kMode);
+    g_settings = outatime::LoadSettings().value_or(outatime::Settings{});
+    ApplyMode(g_settings.mode);
     if (!outatime::StartAltTapHook(hwnd, WM_ALT_TAP)) {
         MessageBoxW(nullptr, L"Failed to install the keyboard hook.", kAppName,
                     MB_OK | MB_ICONERROR);
         DestroyWindow(hwnd);
     }
 
+    // Watch the settings directory so edits apply without a restart.
+    const auto settingsDir = outatime::SettingsDirectory();
+    std::error_code ec;
+    std::filesystem::create_directories(settingsDir, ec);
+    HANDLE watch = FindFirstChangeNotificationW(
+        settingsDir.c_str(), FALSE, FILE_NOTIFY_CHANGE_LAST_WRITE | FILE_NOTIFY_CHANGE_FILE_NAME);
+    const DWORD watchCount = watch != INVALID_HANDLE_VALUE ? 1 : 0;
+
     MSG msg{};
-    while (GetMessageW(&msg, nullptr, 0, 0) > 0) {
-        TranslateMessage(&msg);
-        DispatchMessageW(&msg);
+    for (;;) {
+        const DWORD result = MsgWaitForMultipleObjectsEx(watchCount, &watch, INFINITE, QS_ALLINPUT,
+                                                         MWMO_INPUTAVAILABLE);
+        if (watchCount == 1 && result == WAIT_OBJECT_0) {
+            SetTimer(hwnd, kReloadTimerId, kReloadDelayMs, nullptr);
+            FindNextChangeNotification(watch);
+            continue;
+        }
+        bool quit = false;
+        while (PeekMessageW(&msg, nullptr, 0, 0, PM_REMOVE)) {
+            if (msg.message == WM_QUIT) {
+                quit = true;
+                break;
+            }
+            TranslateMessage(&msg);
+            DispatchMessageW(&msg);
+        }
+        if (quit) {
+            break;
+        }
     }
 
+    if (watch != INVALID_HANDLE_VALUE) {
+        FindCloseChangeNotification(watch);
+    }
     outatime::StopAltTapHook();
     CloseHandle(mutex);
     return static_cast<int>(msg.wParam);

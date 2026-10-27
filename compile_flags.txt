@@ -4,3 +4,5 @@
 -D_UNICODE
 -DWIN32_LEAN_AND_MEAN
 -DNOMINMAX
+-isystem
+build/_deps/json-src/include
