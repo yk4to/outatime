@@ -1,0 +1,15 @@
+# CMake
+/build/
+/out/
+CMakeUserPresets.json
+
+# .NET / MSBuild
+bin/
+obj/
+*.user
+
+# Visual Studio
+.vs/
+
+# Distribution
+/dist/

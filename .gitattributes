@@ -1,0 +1,9 @@
+* text=auto eol=lf
+
+# Files that Windows tooling expects with CRLF
+*.sln text eol=crlf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+*.ico binary
+*.png binary
