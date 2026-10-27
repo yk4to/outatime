@@ -111,14 +111,24 @@ LRESULT CALLBACK MouseProc(int code, WPARAM wParam, LPARAM lParam) {
     return CallNextHookEx(nullptr, code, wParam, lParam);
 }
 
-DWORD WINAPI HookThread(LPVOID readyEvent) {
+// Filled in by the hook thread before it signals `ready`. Lives on the stack of
+// StartAltTapHook, which waits for the signal, so it must not be touched afterwards.
+struct StartupResult {
+    HANDLE ready;
+    bool hooked;
+};
+
+DWORD WINAPI HookThread(LPVOID param) {
+    auto* startup = static_cast<StartupResult*>(param);
+
     // Create the message queue before signaling that thread messages can be posted.
     MSG msg;
     PeekMessageW(&msg, nullptr, WM_USER, WM_USER, PM_NOREMOVE);
 
     const HINSTANCE instance = GetModuleHandleW(nullptr);
     g_keyboardHook = SetWindowsHookExW(WH_KEYBOARD_LL, KeyboardProc, instance, 0);
-    SetEvent(static_cast<HANDLE>(readyEvent));
+    startup->hooked = g_keyboardHook != nullptr;
+    SetEvent(startup->ready);
     if (!g_keyboardHook) {
         return 1;
     }
@@ -149,17 +159,24 @@ bool StartAltTapHook(HWND target, UINT message) {
     g_target = target;
     g_message = message;
 
-    HANDLE ready = CreateEventW(nullptr, TRUE, FALSE, nullptr);
-    g_thread = CreateThread(nullptr, 0, HookThread, ready, 0, &g_threadId);
-    if (!g_thread) {
-        CloseHandle(ready);
+    StartupResult startup{CreateEventW(nullptr, TRUE, FALSE, nullptr), false};
+    if (!startup.ready) {
         return false;
     }
-    WaitForSingleObject(ready, INFINITE);
-    CloseHandle(ready);
+    g_thread = CreateThread(nullptr, 0, HookThread, &startup, 0, &g_threadId);
+    if (!g_thread) {
+        CloseHandle(startup.ready);
+        return false;
+    }
 
-    // The thread exits right away if the hook could not be installed.
-    if (WaitForSingleObject(g_thread, 0) == WAIT_OBJECT_0) {
+    // Also wake up if the thread dies before signaling, so we never wait forever.
+    const HANDLE handles[] = {startup.ready, g_thread};
+    const DWORD signaled = WaitForMultipleObjects(ARRAYSIZE(handles), handles, FALSE, INFINITE);
+    CloseHandle(startup.ready);
+
+    if (signaled != WAIT_OBJECT_0 || !startup.hooked) {
+        // The thread returns right after a failed install; wait so it is fully gone.
+        WaitForSingleObject(g_thread, INFINITE);
         CloseHandle(g_thread);
         g_thread = nullptr;
         return false;
