@@ -6,6 +6,7 @@
 
 #include "alt_tap_hook.hpp"
 #include "ime.hpp"
+#include "resource.h"
 #include "settings.hpp"
 
 namespace {
@@ -108,6 +109,14 @@ void RemoveTrayIcon(HWND hwnd) {
     Shell_NotifyIconW(NIM_DELETE, &nid);
 }
 
+// Picks the string for the user's UI language from Outatime.rc.
+std::wstring LoadResourceString(UINT id) {
+    const wchar_t* text = nullptr;
+    const int length =
+        LoadStringW(GetModuleHandleW(nullptr), id, reinterpret_cast<LPWSTR>(&text), 0);
+    return std::wstring(text, length > 0 ? length : 0);
+}
+
 std::wstring ExeDirectory() {
     wchar_t path[MAX_PATH];
     const DWORD len = GetModuleFileNameW(nullptr, path, MAX_PATH);
@@ -121,7 +130,7 @@ void OpenSettings(HWND hwnd) {
     const auto result = reinterpret_cast<INT_PTR>(
         ShellExecuteW(hwnd, L"open", exe.c_str(), nullptr, nullptr, SW_SHOWNORMAL));
     if (result <= 32) {
-        const std::wstring message = L"Settings app not found:\n" + exe;
+        const std::wstring message = LoadResourceString(IDS_SETTINGS_NOT_FOUND) + exe;
         MessageBoxW(hwnd, message.c_str(), kAppName, MB_OK | MB_ICONWARNING);
     }
 }
@@ -141,9 +150,9 @@ void CloseSettingsWindows() {
 
 void ShowTrayMenu(HWND hwnd, POINT pt) {
     HMENU menu = CreatePopupMenu();
-    AppendMenuW(menu, MF_STRING, kMenuSettings, L"&Settings...");
+    AppendMenuW(menu, MF_STRING, kMenuSettings, LoadResourceString(IDS_MENU_SETTINGS).c_str());
     AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
-    AppendMenuW(menu, MF_STRING, kMenuExit, L"E&xit");
+    AppendMenuW(menu, MF_STRING, kMenuExit, LoadResourceString(IDS_MENU_EXIT).c_str());
     SetMenuDefaultItem(menu, kMenuSettings, FALSE);
 
     UINT flags = TPM_RIGHTBUTTON;
@@ -253,7 +262,7 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int) {
     g_settings = outatime::LoadSettings().value_or(outatime::Settings{});
     ApplyMode(g_settings.mode);
     if (!outatime::StartAltTapHook(hwnd, WM_ALT_TAP)) {
-        MessageBoxW(nullptr, L"Failed to install the keyboard hook.", kAppName,
+        MessageBoxW(nullptr, LoadResourceString(IDS_HOOK_FAILED).c_str(), kAppName,
                     MB_OK | MB_ICONERROR);
         DestroyWindow(hwnd);
     }

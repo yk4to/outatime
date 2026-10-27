@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <data name="AppTitle" xml:space="preserve">
+    <value>Outatime 設定</value>
+  </data>
+  <data name="SettingsTitle.Text" xml:space="preserve">
+    <value>設定</value>
+  </data>
+  <data name="NotRunningInfoBar.Title" xml:space="preserve">
+    <value>Outatime 未在執行</value>
+  </data>
+  <data name="NotRunningInfoBar.Message" xml:space="preserve">
+    <value>啟動後即可使用 Alt 鍵切換輸入法。</value>
+  </data>
+  <data name="StartButton.Content" xml:space="preserve">
+    <value>啟動</value>
+  </data>
+  <data name="ModeCard.Header" xml:space="preserve">
+    <value>Alt 鍵行為</value>
+  </data>
+  <data name="ModeCard.Description" xml:space="preserve">
+    <value>單獨按下 Alt 鍵時執行的動作</value>
+  </data>
+  <data name="ModeToggle.Content" xml:space="preserve">
+    <value>左 Alt 鍵切換輸入法</value>
+  </data>
+  <data name="ModeLeftOffRightOn.Content" xml:space="preserve">
+    <value>左 Alt 鍵關閉輸入法，右 Alt 鍵開啟輸入法</value>
+  </data>
+  <data name="ModeDisabled.Content" xml:space="preserve">
+    <value>不執行任何動作</value>
+  </data>
+  <data name="StartupCard.Header" xml:space="preserve">
+    <value>登入時啟動</value>
+  </data>
+  <data name="StartupCard.Description" xml:space="preserve">
+    <value>以系統管理員身分執行後，也能在以系統管理員身分執行的應用程式中切換輸入法</value>
+  </data>
+  <data name="StartupOff.Content" xml:space="preserve">
+    <value>關閉</value>
+  </data>
+  <data name="StartupNormal.Content" xml:space="preserve">
+    <value>開啟</value>
+  </data>
+  <data name="StartupElevated.Content" xml:space="preserve">
+    <value>開啟（以系統管理員身分執行）</value>
+  </data>
+  <data name="RestartElevatedTitle" xml:space="preserve">
+    <value>Outatime 未以系統管理員身分執行</value>
+  </data>
+  <data name="RestartNormalTitle" xml:space="preserve">
+    <value>Outatime 正以系統管理員身分執行</value>
+  </data>
+  <data name="RestartMessage" xml:space="preserve">
+    <value>重新啟動以立即套用此設定。</value>
+  </data>
+  <data name="RestartButton.Content" xml:space="preserve">
+    <value>重新啟動</value>
+  </data>
+  <data name="SettingsFileCard.Header" xml:space="preserve">
+    <value>設定檔</value>
+  </data>
+  <data name="OpenSettingsFileButton.Content" xml:space="preserve">
+    <value>開啟</value>
+  </data>
+  <data name="AboutHeader.Text" xml:space="preserve">
+    <value>關於</value>
+  </data>
+  <data name="AboutCard.Header" xml:space="preserve">
+    <value>Outatime</value>
+  </data>
+  <data name="AboutVersion" xml:space="preserve">
+    <value>版本 {0}</value>
+  </data>
+  <data name="SaveErrorTitle" xml:space="preserve">
+    <value>無法儲存設定</value>
+  </data>
+  <data name="StartupErrorTitle" xml:space="preserve">
+    <value>無法變更啟動設定</value>
+  </data>
+  <data name="StartErrorTitle" xml:space="preserve">
+    <value>無法啟動 Outatime</value>
+  </data>
+  <data name="OpenSettingsFileErrorTitle" xml:space="preserve">
+    <value>無法開啟設定檔</value>
+  </data>
+  <data name="RestartErrorTitle" xml:space="preserve">
+    <value>無法重新啟動 Outatime</value>
+  </data>
+  <data name="ResidentExitTimeout" xml:space="preserve">
+    <value>Outatime 未結束。</value>
+  </data>
+  <data name="ResidentStartTimeout" xml:space="preserve">
+    <value>Outatime 未啟動。</value>
+  </data>
+  <data name="SchtasksFailed" xml:space="preserve">
+    <value>工作排程器發生錯誤（結束代碼 {0}）。</value>
+  </data>
+  <data name="ErrorDialogClose" xml:space="preserve">
+    <value>確定</value>
+  </data>
+</root>
