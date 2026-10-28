@@ -23,7 +23,7 @@ std::filesystem::path LogDirectory() {
 namespace {
 
 // Keep the log small: once it grows past this, the previous one is kept as .old.
-constexpr ULONGLONG kMaxLogBytes = 64 * 1024;
+constexpr ULONGLONG kMaxLogBytes = 64ULL * 1024;
 
 std::wstring ProcessName(HWND window) {
     DWORD processId = 0;

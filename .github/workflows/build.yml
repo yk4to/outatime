@@ -30,6 +30,21 @@ jobs:
       # package.ps1 configures and builds the Release tree, tests included.
       - name: Run tests
         run: ctest --preset release
+      - name: Check C# formatting
+        run: dotnet format src/Outatime.Settings --verify-no-changes --no-restore
+      # Visual Studio's clang-tidy, the same version as locally. Uses .clang-tidy and
+      # compile_flags.txt, which needs the dependencies fetched by the configure above.
+      - name: Run clang-tidy
+        run: |
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          $tidy = & $vswhere -latest -find 'VC\Tools\Llvm\x64\bin\clang-tidy.exe'
+          if (-not $tidy) { throw 'clang-tidy was not found in Visual Studio' }
+          & $tidy --version
+          $failed = (Get-ChildItem src/Outatime/*.cpp, tests/*.cpp).FullName | ForEach-Object -ThrottleLimit 4 -Parallel {
+            & $using:tidy --quiet --warnings-as-errors='*' $_ | Out-Host
+            if ($LASTEXITCODE -ne 0) { $_ }
+          }
+          if ($failed) { throw "clang-tidy found problems in: $failed" }
       - uses: actions/upload-artifact@v7
         with:
           name: Outatime-win-x64

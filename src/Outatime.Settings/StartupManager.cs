@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.Security;
 using System.Security.Principal;
 using System.Text;
@@ -71,7 +72,7 @@ internal static class StartupManager
         if (process.ExitCode != 0)
         {
             throw new InvalidOperationException(
-                string.Format(Resources.GetString("SchtasksFailed"), process.ExitCode));
+                string.Format(CultureInfo.CurrentCulture, Resources.GetString("SchtasksFailed"), process.ExitCode));
         }
     }
 
@@ -119,7 +120,7 @@ internal static class StartupManager
         if (process.ExitCode != 0)
         {
             throw new InvalidOperationException(
-                string.Format(Resources.GetString("SchtasksFailed"), process.ExitCode));
+                string.Format(CultureInfo.CurrentCulture, Resources.GetString("SchtasksFailed"), process.ExitCode));
         }
     }
 

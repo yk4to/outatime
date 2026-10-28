@@ -1,0 +1,13 @@
+# Also read by clangd, so the editor shows the same findings as CI.
+Checks: >
+  -*,
+  bugprone-*,
+  performance-*,
+  clang-analyzer-*,
+  -bugprone-easily-swappable-parameters,
+  -bugprone-throwing-static-initialization,
+  -performance-enum-size,
+  -performance-no-int-to-ptr,
+  -clang-analyzer-optin.core.EnumCastOutOfRange
+# Our own headers only, not Windows SDK, STL or fetched dependencies.
+HeaderFilterRegex: '.*[/\](src|tests)[/\].*'
