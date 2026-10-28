@@ -12,7 +12,9 @@ constexpr std::uint32_t kVkTab = 0x09;
 constexpr std::uint32_t kVkA = 0x41;
 constexpr std::uint32_t kVkF = 0x46;
 constexpr std::uint32_t kVkX = 0x58;
+constexpr std::uint32_t kVkLeftShift = 0xA0;
 constexpr std::uint32_t kVkLeftCtrl = 0xA2;
+constexpr std::uint32_t kVkLeftWin = 0x5B;
 constexpr std::uint32_t kVkLeftButton = 0x01;
 constexpr std::uint32_t kVkMask = 0xE8;
 constexpr std::uint32_t kAltGrFakeCtrlScanCode = 0x21D;
@@ -78,18 +80,73 @@ TEST_F(AltTapDetectorTest, KeyDuringAltIsCombination) {
     EXPECT_EQ(Up(kVkLeftAlt), Decision::PassThrough);
 }
 
-TEST_F(AltTapDetectorTest, KeyHeldBeforeAltIsCombination) {
+TEST_F(AltTapDetectorTest, ModifierHeldBeforeAltIsCombination) {
     Down(kVkLeftCtrl);
     EXPECT_EQ(Down(kVkLeftAlt), Decision::PassThrough);
     EXPECT_FALSE(detector.AltHeld());
     EXPECT_EQ(Up(kVkLeftAlt), Decision::PassThrough);
 }
 
-TEST_F(AltTapDetectorTest, OtherKeyReleasedDuringAltStillCombination) {
+TEST_F(AltTapDetectorTest, ModifierLetGoDuringAltIsStillCombination) {
+    // E.g. Shift+Alt, the default input language hotkey, released in either order.
+    for (const std::uint32_t modifier : {kVkLeftShift, kVkLeftCtrl, kVkLeftWin, kVkRightAlt}) {
+        Down(modifier);
+        Down(kVkLeftAlt);
+        Up(modifier);
+        EXPECT_EQ(Up(kVkLeftAlt), Decision::PassThrough) << "modifier " << modifier;
+    }
+}
+
+// Fast typing: the last letter is still held when Alt goes down. Recorded from a
+// real trace (times in ms), where this used to leave the IME unchanged.
+TEST_F(AltTapDetectorTest, PreviousKeyLetGoDuringAltIsTap) {
+    Down(kVkA, 40892109);
+    EXPECT_EQ(Down(kVkLeftAlt, 40892187), Decision::PassThrough);
+    EXPECT_TRUE(detector.AltHeld());
+    Up(kVkA, 40892203);
+    EXPECT_TRUE(detector.AltHeld());
+    EXPECT_EQ(Up(kVkLeftAlt, 40892281), Decision::Tap);
+}
+
+TEST_F(AltTapDetectorTest, PreviousKeyStillHeldAtReleaseIsCombination) {
+    Down(kVkA, 0);
+    Down(kVkLeftAlt, 50);
+    EXPECT_EQ(Up(kVkLeftAlt, 100), Decision::PassThrough);
+}
+
+TEST_F(AltTapDetectorTest, PreviousKeyRepeatingDuringAltIsCombination) {
+    // The app sees Alt+A from the repeat.
+    Down(kVkA, 0);
+    Down(kVkLeftAlt, 400);
+    EXPECT_EQ(Down(kVkA, 500), Decision::PassThrough);
+    EXPECT_FALSE(detector.AltHeld());
+    Up(kVkA, 530);
+    EXPECT_EQ(Up(kVkLeftAlt, 600), Decision::PassThrough);
+}
+
+TEST_F(AltTapDetectorTest, NewKeyAfterPreviousKeyLetGoIsCombination) {
+    Down(kVkA, 0);
+    Down(kVkLeftAlt, 50);
+    Up(kVkA, 60);
+    EXPECT_EQ(Down(kVkF, 80), Decision::PassThrough);
+    Up(kVkF, 90);
+    EXPECT_EQ(Up(kVkLeftAlt, 100), Decision::PassThrough);
+}
+
+TEST_F(AltTapDetectorTest, HeldUpToTimeoutIsTap) {
+    EXPECT_EQ(Tap(kVkLeftAlt, 0, AltTapDetector::kTapTimeoutMs), Decision::Tap);
+}
+
+TEST_F(AltTapDetectorTest, HeldPastTimeoutIsNotTap) {
+    EXPECT_EQ(Tap(kVkLeftAlt, 0, AltTapDetector::kTapTimeoutMs + 1), Decision::PassThrough);
+    // Nor does it arm a double tap.
+    EXPECT_EQ(Down(kVkLeftAlt, AltTapDetector::kTapTimeoutMs + 50), Decision::PassThrough);
+}
+
+TEST_F(AltTapDetectorTest, MissedModifierKeyUpIsRecovered) {
     Down(kVkLeftCtrl);
-    Down(kVkLeftAlt);
-    Up(kVkLeftCtrl);
-    EXPECT_EQ(Up(kVkLeftAlt), Decision::PassThrough);
+    input.down.erase(kVkLeftCtrl);
+    EXPECT_EQ(Tap(kVkLeftAlt, 0, 50), Decision::Tap);
 }
 
 TEST_F(AltTapDetectorTest, UnwatchedKeyPassesThrough) {

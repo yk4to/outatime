@@ -9,8 +9,8 @@ enum class AltKey : WPARAM {
     Right,
 };
 
-// Watches for Alt keys tapped on their own (pressed and released with no other
-// key or mouse button in between) using low-level hooks on a dedicated thread.
+// Watches for Alt keys tapped on their own (see AltTapDetector for the rules)
+// using low-level hooks on a dedicated thread.
 //
 // A detected tap is swallowed so it does not open the menu bar, and `tapMessage`
 // is posted to `target` with the AltKey as wParam and the foreground window at
