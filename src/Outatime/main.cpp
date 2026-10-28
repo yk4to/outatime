@@ -10,6 +10,7 @@
 #include "ime.hpp"
 #include "resource.h"
 #include "settings.hpp"
+#include "trace.hpp"
 
 namespace {
 
@@ -46,6 +47,19 @@ constexpr UINT kReloadDelayMs = 200;
 constexpr UINT_PTR kStatusTimerId = 2;
 constexpr UINT kStatusIntervalMs = 1000;
 
+// Some apps accept an IME change and undo it a moment later, which the read-back
+// right after the change cannot see. Check once more after this long.
+constexpr UINT_PTR kRecheckTimerId = 3;
+constexpr UINT kRecheckDelayMs = 300;
+
+#ifndef NDEBUG
+// Debug builds also trace the IME state every 50 ms for 500 ms after a tap.
+constexpr UINT_PTR kWatchTimerId = 4;
+constexpr UINT kWatchIntervalMs = 50;
+constexpr int kWatchTicks = 10;
+int g_watchTick = 0;
+#endif
+
 // Whether Alt taps switch the IME right now, shown by the tray icon and tooltip.
 enum class Status {
     Active,
@@ -64,6 +78,7 @@ Status g_status = Status::Active;
 // What the last tap changed, so a double tap can put it back.
 HWND g_lastTapWindow = nullptr;
 std::optional<bool> g_lastTapPreviousOpen;
+std::optional<bool> g_lastTapRequestedOpen;
 HICON g_activeIcon = nullptr;
 HICON g_pausedIcon = nullptr;
 
@@ -204,9 +219,19 @@ void OnAltTap(Mode mode, AltKey key, HWND foreground) {
     case Mode::Disabled:
         break;
     }
-    if (action) {
-        g_lastTapWindow = foreground;
-        g_lastTapPreviousOpen = outatime::ime::Apply(*action, foreground);
+    if (!action) {
+        return;
+    }
+    const auto result = outatime::ime::Apply(*action, foreground);
+    g_lastTapWindow = foreground;
+    g_lastTapPreviousOpen = result.previous;
+    g_lastTapRequestedOpen = result.requested;
+    if (result.requested) {
+        SetTimer(g_hwnd, kRecheckTimerId, kRecheckDelayMs, nullptr);
+#ifndef NDEBUG
+        g_watchTick = 0;
+        SetTimer(g_hwnd, kWatchTimerId, kWatchIntervalMs, nullptr);
+#endif
     }
 }
 
@@ -218,6 +243,8 @@ void OnAltDoubleTap() {
     }
     g_lastTapWindow = nullptr;
     g_lastTapPreviousOpen.reset();
+    g_lastTapRequestedOpen.reset();
+    KillTimer(g_hwnd, kRecheckTimerId);
 }
 
 std::wstring ExeDirectory() {
@@ -290,10 +317,13 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         return 0;
 
     case WM_ALT_TAP:
+        OUTATIME_TRACE(L"main  tap received (posted %ld ms ago by tick count)",
+                       static_cast<long>(GetTickCount() - GetMessageTime()));
         OnAltTap(g_settings.mode, static_cast<AltKey>(wParam), reinterpret_cast<HWND>(lParam));
         return 0;
 
     case WM_ALT_DOUBLE_TAP:
+        OUTATIME_TRACE(L"main  double tap received, restoring");
         OnAltDoubleTap();
         return 0;
 
@@ -305,8 +335,27 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         }
         if (wParam == kStatusTimerId) {
             UpdateStatus();
+            outatime::trace::Flush();
             return 0;
         }
+        if (wParam == kRecheckTimerId) {
+            KillTimer(hwnd, kRecheckTimerId);
+            if (g_lastTapRequestedOpen) {
+                outatime::ime::Recheck(g_lastTapWindow, *g_lastTapRequestedOpen);
+            }
+            return 0;
+        }
+#ifndef NDEBUG
+        if (wParam == kWatchTimerId) {
+            const auto open = outatime::ime::GetOpen(g_lastTapWindow);
+            OUTATIME_TRACE(L"watch +%3u ms open=%s", (g_watchTick + 1) * kWatchIntervalMs,
+                           open ? (*open ? L"open" : L"closed") : L"?");
+            if (++g_watchTick >= kWatchTicks) {
+                KillTimer(hwnd, kWatchTimerId);
+            }
+            return 0;
+        }
+#endif
         break;
 
     case WM_COMMAND:
@@ -432,6 +481,7 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int) {
         UnhookWinEvent(foregroundHook);
     }
     outatime::StopAltTapHook();
+    outatime::trace::Flush();
     DestroyIcon(g_activeIcon);
     DestroyIcon(g_pausedIcon);
     CloseHandle(mutex);

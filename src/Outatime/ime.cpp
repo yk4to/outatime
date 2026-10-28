@@ -7,6 +7,7 @@
 #include <optional>
 
 #include "diagnostics.hpp"
+#include "trace.hpp"
 
 namespace outatime::ime {
 namespace {
@@ -69,6 +70,7 @@ std::optional<Target> Resolve(HWND foreground) {
 }
 
 void SetAndVerify(const Target& target, bool open) {
+    OUTATIME_TRACE(L"ime   set open=%s", StateName(open));
     if (!SendImeControl(target.imeWindow, IMC_SETOPENSTATUS, open ? 1 : 0, nullptr, L"set-failed",
                         target.window)) {
         return;
@@ -81,6 +83,7 @@ void SetAndVerify(const Target& target, bool open) {
                             target.window)) {
             return;
         }
+        OUTATIME_TRACE(L"ime   verify #%d open=%s", attempt, StateName(actual != 0));
         if ((actual != 0) == open) {
             return;
         }
@@ -96,43 +99,70 @@ void SetAndVerify(const Target& target, bool open) {
 
 }  // namespace
 
-std::optional<bool> Apply(Action action, HWND foreground) {
+ApplyResult Apply(Action action, HWND foreground) {
     const auto target = Resolve(foreground);
     if (!target) {
-        return std::nullopt;
+        return {};
     }
 
     // Read the current state even for On/Off so a double tap can restore it.
     // On/Off still set the state if this fails, and never skip setting because
     // the state already looks right: the reading may not match what the user sees.
-    std::optional<bool> previous;
+    ApplyResult result;
     if (DWORD_PTR current = 0; SendImeControl(target->imeWindow, IMC_GETOPENSTATUS, 0, &current,
                                               L"get-failed", target->window)) {
-        previous = current != 0;
+        result.previous = current != 0;
     }
+    OUTATIME_TRACE(L"ime   get open=%s", result.previous ? StateName(*result.previous) : L"?");
 
-    bool open = false;
     switch (action) {
     case Action::On:
-        open = true;
+        result.requested = true;
         break;
     case Action::Off:
-        open = false;
+        result.requested = false;
         break;
     case Action::Toggle:
-        if (!previous) {
-            return std::nullopt;
+        if (result.previous) {
+            result.requested = !*result.previous;
         }
-        open = !*previous;
         break;
     }
-    SetAndVerify(*target, open);
-    return previous;
+    if (result.requested) {
+        SetAndVerify(*target, *result.requested);
+    }
+    return result;
 }
 
 void SetOpen(HWND foreground, bool open) {
     if (const auto target = Resolve(foreground)) {
         SetAndVerify(*target, open);
+    }
+}
+
+std::optional<bool> GetOpen(HWND foreground) {
+    const auto target = Resolve(foreground);
+    DWORD_PTR open = 0;
+    if (!target || !SendImeControl(target->imeWindow, IMC_GETOPENSTATUS, 0, &open, L"get-failed",
+                                   target->window)) {
+        return std::nullopt;
+    }
+    return open != 0;
+}
+
+void Recheck(HWND foreground, bool expected) {
+    const auto target = Resolve(foreground);
+    DWORD_PTR actual = 0;
+    if (!target || !SendImeControl(target->imeWindow, IMC_GETOPENSTATUS, 0, &actual,
+                                   L"recheck-failed", target->window)) {
+        return;
+    }
+    OUTATIME_TRACE(L"ime   recheck open=%s (expected %s)", StateName(actual != 0),
+                   StateName(expected));
+    if ((actual != 0) != expected) {
+        wchar_t detail[64];
+        swprintf_s(detail, L"expected=%s actual=%s", StateName(expected), StateName(actual != 0));
+        diagnostics::LogFailure(L"state-reverted", target->window, detail);
     }
 }
 

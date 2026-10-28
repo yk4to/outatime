@@ -1,6 +1,7 @@
 #include "alt_tap_hook.hpp"
 
 #include "alt_tap_detector.hpp"
+#include "trace.hpp"
 
 namespace outatime {
 namespace {
@@ -35,6 +36,27 @@ HHOOK g_keyboardHook = nullptr;
 HHOOK g_mouseHook = nullptr;
 
 LRESULT CALLBACK MouseProc(int code, WPARAM wParam, LPARAM lParam);
+
+#ifndef NDEBUG
+// Traces Alt events, and only that some other key moved shortly after one (never
+// which key), so the timing around a tap can be read from trace.log.
+void TraceKey(const KeyEvent& event, Decision decision) {
+    static DWORD lastAltTime = 0;  // Hook thread only
+    const bool alt = event.vk == VK_LMENU || event.vk == VK_RMENU;
+    if (alt) {
+        lastAltTime = event.time;
+    } else if (event.time - lastAltTime > 1000) {
+        return;
+    }
+    static constexpr const wchar_t* kDecisions[] = {L"pass", L"TAP", L"DOUBLE-TAP"};
+    OUTATIME_TRACE(L"hook  %-10s %-4s%s time=%lu -> %s",
+                   alt              ? (event.vk == VK_LMENU ? L"LAlt" : L"RAlt")
+                   : event.injected ? L"injected"
+                                    : L"key",
+                   event.down ? L"down" : L"up", event.injected ? L" (injected)" : L"", event.time,
+                   kDecisions[static_cast<int>(decision)]);
+}
+#endif
 
 // The mouse hook is only needed while an Alt key is held, so it is installed on
 // demand. Call after giving the detector an event, with AltHeld() from before.
@@ -88,16 +110,21 @@ LRESULT CALLBACK KeyboardProc(int code, WPARAM wParam, LPARAM lParam) {
     const bool wasAltHeld = g_detector.AltHeld();
     const Decision decision = g_detector.OnKey(event);
     UpdateMouseHook(wasAltHeld);
+#ifndef NDEBUG
+    TraceKey(event, decision);
+#endif
 
     switch (decision) {
     case Decision::Tap:
         // Swallow the real key-up and replay it after the mask key. If that fails,
         // fall back to a plain Alt press.
         if (ReplayMaskedAltUp(kb.vkCode)) {
+            OUTATIME_TRACE(L"hook  replayed masked key-up, posting tap");
             PostMessageW(g_target, g_tapMessage, key,
                          reinterpret_cast<LPARAM>(GetForegroundWindow()));
             return 1;
         }
+        OUTATIME_TRACE(L"hook  replay FAILED, letting the key-up through");
         g_detector.OnTapNotReplayed();
         break;
     case Decision::DoubleTap:
@@ -113,6 +140,9 @@ LRESULT CALLBACK MouseProc(int code, WPARAM wParam, LPARAM lParam) {
     if (code == HC_ACTION && wParam != WM_MOUSEMOVE) {
         const bool wasAltHeld = g_detector.AltHeld();
         g_detector.OnMouseInput();
+        if (wasAltHeld) {
+            OUTATIME_TRACE(L"hook  mouse input while Alt held -> combination");
+        }
         UpdateMouseHook(wasAltHeld);
     }
     return CallNextHookEx(nullptr, code, wParam, lParam);

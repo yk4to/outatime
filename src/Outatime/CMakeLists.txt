@@ -17,6 +17,7 @@ target_compile_options(outatime_core PRIVATE /W4 /permissive- /utf-8)
 add_executable(Outatime WIN32
     main.cpp
     alt_tap_hook.cpp
+    trace.cpp
     ime.cpp
     diagnostics.cpp
     settings.cpp
