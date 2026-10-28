@@ -1,7 +1,6 @@
 #include "alt_tap_hook.hpp"
 
-#include <atomic>
-#include <bitset>
+#include "alt_tap_detector.hpp"
 
 namespace outatime {
 namespace {
@@ -10,74 +9,45 @@ namespace {
 // does not treat the Alt release as a menu bar activation.
 constexpr WORD kMaskKey = 0xE8;
 
-// AltGr layouts report Right Alt as a fake Left Ctrl with this scan code plus Right Alt.
-constexpr DWORD kAltGrFakeCtrlScanCode = 0x21D;
-
 // Asks the hook thread to remove the mouse hook once no Alt key is held.
 constexpr UINT WM_UPDATE_MOUSE_HOOK = WM_APP + 1;
+
+class PhysicalInputState final : public InputState {
+public:
+    bool IsDown(std::uint32_t vk) const override {
+        return (GetAsyncKeyState(static_cast<int>(vk)) & 0x8000) != 0;
+    }
+};
 
 HWND g_target = nullptr;
 UINT g_tapMessage = 0;
 UINT g_doubleTapMessage = 0;
-std::atomic<bool> g_leftEnabled = false;
-std::atomic<bool> g_rightEnabled = false;
-std::atomic<DWORD> g_doubleTapMs = 0;
 
 HANDLE g_thread = nullptr;
 DWORD g_threadId = 0;
 
-// Everything below is touched only on the hook thread.
+const PhysicalInputState g_input;
+// Its setters are called from the main thread; everything else from the hook thread.
+AltTapDetector g_detector(g_input);
+
+// Touched only on the hook thread.
 HHOOK g_keyboardHook = nullptr;
 HHOOK g_mouseHook = nullptr;
-std::bitset<256> g_pressed;
-DWORD g_candidate = 0;  // VK of the Alt key that may become a tap, or 0.
-// The last tap, so a second press of the same key soon after can undo it.
-DWORD g_lastTapVk = 0;
-DWORD g_lastTapTime = 0;  // KBDLLHOOKSTRUCT::time of its key-up
-
-bool IsWatched(DWORD vk) {
-    return (vk == VK_LMENU && g_leftEnabled) || (vk == VK_RMENU && g_rightEnabled);
-}
 
 LRESULT CALLBACK MouseProc(int code, WPARAM wParam, LPARAM lParam);
 
-// The mouse hook is only needed while an Alt key is held, so it is installed on demand.
-void SetCandidate(DWORD vk) {
-    if (g_candidate == vk) {
-        return;
-    }
-    const bool hadCandidate = g_candidate != 0;
-    g_candidate = vk;
-    if (vk != 0 && !g_mouseHook) {
+// The mouse hook is only needed while an Alt key is held, so it is installed on
+// demand. Call after giving the detector an event, with AltHeld() from before.
+void UpdateMouseHook(bool wasAltHeld) {
+    const bool altHeld = g_detector.AltHeld();
+    if (altHeld && !g_mouseHook) {
         // Install right here rather than via the message loop, so a click right after
         // the Alt press is not missed.
         g_mouseHook = SetWindowsHookExW(WH_MOUSE_LL, MouseProc, GetModuleHandleW(nullptr), 0);
-    } else if (vk == 0 && hadCandidate) {
+    } else if (!altHeld && wasAltHeld) {
         // Removal can wait; MouseProc calls this, and it should not unhook itself.
         PostThreadMessageW(g_threadId, WM_UPDATE_MOUSE_HOOK, 0, 0);
     }
-}
-
-// Catches buttons held across the Alt press (e.g. Alt+drag started before Alt),
-// which the mouse hook never sees go down.
-bool AnyMouseButtonDown() {
-    for (const int vk : {VK_LBUTTON, VK_RBUTTON, VK_MBUTTON, VK_XBUTTON1, VK_XBUTTON2}) {
-        if (GetAsyncKeyState(vk) & 0x8000) {
-            return true;
-        }
-    }
-    return false;
-}
-
-// Key-ups can be missed (e.g. released on the secure desktop), so drop keys
-// that are no longer physically held before deciding nothing else is pressed.
-bool NoOtherKeysPressed() {
-    for (size_t vk = 0; vk < g_pressed.size(); ++vk) {
-        if (g_pressed[vk] && !(GetAsyncKeyState(static_cast<int>(vk)) & 0x8000)) {
-            g_pressed[vk] = false;
-        }
-    }
-    return g_pressed.none();
 }
 
 // Sends the mask key and then the Alt key-up. Returns false if the Alt key-up was
@@ -106,55 +76,44 @@ LRESULT CALLBACK KeyboardProc(int code, WPARAM wParam, LPARAM lParam) {
         return CallNextHookEx(nullptr, code, wParam, lParam);
     }
     const auto& kb = *reinterpret_cast<const KBDLLHOOKSTRUCT*>(lParam);
-    // Ignore our own injected keys (and other tools'), and the AltGr fake Ctrl.
-    if ((kb.flags & LLKHF_INJECTED) || kb.vkCode >= g_pressed.size() ||
-        (kb.vkCode == VK_LCONTROL && kb.scanCode == kAltGrFakeCtrlScanCode)) {
-        return CallNextHookEx(nullptr, code, wParam, lParam);
-    }
+    const KeyEvent event{
+        .vk = kb.vkCode,
+        .scanCode = kb.scanCode,
+        .down = wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN,
+        .injected = (kb.flags & LLKHF_INJECTED) != 0,
+        .time = kb.time,
+    };
+    const auto key = static_cast<WPARAM>(kb.vkCode == VK_LMENU ? AltKey::Left : AltKey::Right);
 
-    const DWORD vk = kb.vkCode;
-    const auto key = static_cast<WPARAM>(vk == VK_LMENU ? AltKey::Left : AltKey::Right);
-    const bool down = wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN;
-    if (down) {
-        const bool repeat = g_pressed[vk];
-        if (!repeat) {
-            // Pressing the same Alt key again right after a tap means the user wants a
-            // plain Alt (e.g. to open the menu bar): undo the tap and let this press
-            // through untouched. Any other key in between cancels this.
-            const bool doubleTap =
-                vk == g_lastTapVk && IsWatched(vk) && kb.time - g_lastTapTime <= g_doubleTapMs;
-            g_lastTapVk = 0;
-            if (doubleTap) {
-                SetCandidate(0);
-                PostMessageW(g_target, g_doubleTapMessage, key, 0);
-            } else {
-                const bool alone = NoOtherKeysPressed() && !AnyMouseButtonDown();
-                SetCandidate(IsWatched(vk) && alone ? vk : 0);
-            }
+    const bool wasAltHeld = g_detector.AltHeld();
+    const Decision decision = g_detector.OnKey(event);
+    UpdateMouseHook(wasAltHeld);
+
+    switch (decision) {
+    case Decision::Tap:
+        // Swallow the real key-up and replay it after the mask key. If that fails,
+        // fall back to a plain Alt press.
+        if (ReplayMaskedAltUp(kb.vkCode)) {
+            PostMessageW(g_target, g_tapMessage, key,
+                         reinterpret_cast<LPARAM>(GetForegroundWindow()));
+            return 1;
         }
-        g_pressed[vk] = true;
-    } else {
-        g_pressed[vk] = false;
-        if (vk == g_candidate) {
-            SetCandidate(0);
-            // Swallow the real key-up and replay it after the mask key. If that fails,
-            // fall back to a plain Alt press.
-            if (!AnyMouseButtonDown() && ReplayMaskedAltUp(vk)) {
-                g_lastTapVk = vk;
-                g_lastTapTime = kb.time;
-                PostMessageW(g_target, g_tapMessage, key,
-                             reinterpret_cast<LPARAM>(GetForegroundWindow()));
-                return 1;
-            }
-        }
+        g_detector.OnTapNotReplayed();
+        break;
+    case Decision::DoubleTap:
+        PostMessageW(g_target, g_doubleTapMessage, key, 0);
+        break;
+    case Decision::PassThrough:
+        break;
     }
     return CallNextHookEx(nullptr, code, wParam, lParam);
 }
 
 LRESULT CALLBACK MouseProc(int code, WPARAM wParam, LPARAM lParam) {
-    // Any click or wheel turns the Alt press into a combination (e.g. Alt+click).
     if (code == HC_ACTION && wParam != WM_MOUSEMOVE) {
-        SetCandidate(0);
+        const bool wasAltHeld = g_detector.AltHeld();
+        g_detector.OnMouseInput();
+        UpdateMouseHook(wasAltHeld);
     }
     return CallNextHookEx(nullptr, code, wParam, lParam);
 }
@@ -183,7 +142,7 @@ DWORD WINAPI HookThread(LPVOID param) {
 
     while (GetMessageW(&msg, nullptr, 0, 0) > 0) {
         // A new Alt press may have arrived since the removal was requested.
-        if (msg.message == WM_UPDATE_MOUSE_HOOK && g_candidate == 0 && g_mouseHook) {
+        if (msg.message == WM_UPDATE_MOUSE_HOOK && !g_detector.AltHeld() && g_mouseHook) {
             UnhookWindowsHookEx(g_mouseHook);
             g_mouseHook = nullptr;
         }
@@ -240,11 +199,8 @@ void StopAltTapHook() {
     g_thread = nullptr;
 }
 
-void SetAltTapKeys(bool left, bool right) {
-    g_leftEnabled = left;
-    g_rightEnabled = right;
-}
+void SetAltTapKeys(bool left, bool right) { g_detector.SetWatchedKeys(left, right); }
 
-void SetDoubleTapMs(DWORD ms) { g_doubleTapMs = ms; }
+void SetDoubleTapMs(DWORD ms) { g_detector.SetDoubleTapMs(ms); }
 
 }  // namespace outatime
