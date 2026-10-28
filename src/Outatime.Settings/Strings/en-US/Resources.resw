@@ -46,6 +46,13 @@
     <value>Do nothing</value>
   </data>
 
+  <data name="DoubleTapCard.Header" xml:space="preserve">
+    <value>Double-tap Alt for a regular Alt</value>
+  </data>
+  <data name="DoubleTapCard.Description" xml:space="preserve">
+    <value>Press the same Alt key twice quickly to undo the IME switch and use Alt as usual, such as to open the menu bar.</value>
+  </data>
+
   <data name="FullScreenCard.Header" xml:space="preserve">
     <value>Pause in full-screen apps</value>
   </data>

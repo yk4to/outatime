@@ -73,6 +73,14 @@ std::optional<Settings> LoadSettings() {
         settings.pauseInFullScreen =
             ParseFullScreenPause(it->get<std::string>()).value_or(settings.pauseInFullScreen);
     }
+    if (const auto it = json.find("doubleTap"); it != json.end() && it->is_boolean()) {
+        settings.doubleTap = it->get<bool>();
+    }
+    // Values past a second would turn deliberate repeated taps into plain Alt presses.
+    if (const auto it = json.find("doubleTapMs");
+        it != json.end() && it->is_number_integer() && *it >= 0 && *it <= 1000) {
+        settings.doubleTapMs = it->get<unsigned>();
+    }
     return settings;
 }
 

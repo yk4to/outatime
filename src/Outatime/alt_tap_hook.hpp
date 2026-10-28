@@ -11,13 +11,22 @@ enum class AltKey : WPARAM {
 
 // Watches for Alt keys tapped on their own (pressed and released with no other
 // key or mouse button in between) using low-level hooks on a dedicated thread.
-// A detected tap is swallowed so it does not open the menu bar, and `message`
+//
+// A detected tap is swallowed so it does not open the menu bar, and `tapMessage`
 // is posted to `target` with the AltKey as wParam and the foreground window at
 // the time of the tap as lParam, so focus changes before it is handled don't matter.
-bool StartAltTapHook(HWND target, UINT message);
+//
+// If the same Alt key is pressed again within the double-tap time, that press is
+// let through as a plain Alt and `doubleTapMessage` is posted with the AltKey as
+// wParam, so the target can undo what the first tap did.
+bool StartAltTapHook(HWND target, UINT tapMessage, UINT doubleTapMessage);
 void StopAltTapHook();
 
 // Which Alt keys to watch. Taps on other Alt keys pass through untouched.
 void SetAltTapKeys(bool left, bool right);
+
+// Time from a tap's release to the next press of the same key that counts as a
+// double tap. 0 turns double taps off.
+void SetDoubleTapMs(DWORD ms);
 
 }  // namespace outatime

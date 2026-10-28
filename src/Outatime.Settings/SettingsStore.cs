@@ -11,6 +11,8 @@ internal static class SettingsStore
     public const string DefaultMode = "toggle";
     public const string FullScreenPauseKey = "pauseInFullScreen";
     public const string DefaultFullScreenPause = "games";
+    public const string DoubleTapKey = "doubleTap";
+    public const bool DefaultDoubleTap = true;
 
     private static readonly string SettingsDirectory = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Outatime");
@@ -26,22 +28,34 @@ internal static class SettingsStore
         }
     }
 
-    public static string Get(string key, string defaultValue)
+    public static string Get(string key, string defaultValue) =>
+        TryGet(key, out string? value) && value is not null ? value : defaultValue;
+
+    public static bool Get(string key, bool defaultValue) =>
+        TryGet(key, out bool value) ? value : defaultValue;
+
+    public static void Set(string key, string value) => Set(key, JsonValue.Create(value)!);
+
+    public static void Set(string key, bool value) => Set(key, JsonValue.Create(value));
+
+    // False if the key is missing, has another type, or the file can't be read.
+    private static bool TryGet<T>(string key, out T? value)
     {
         try
         {
-            if (Load()[key] is JsonValue value && value.TryGetValue(out string? text))
+            if (Load()[key] is JsonValue node && node.TryGetValue(out value))
             {
-                return text;
+                return true;
             }
         }
         catch (Exception ex) when (ex is IOException or JsonException)
         {
         }
-        return defaultValue;
+        value = default;
+        return false;
     }
 
-    public static void Set(string key, string value)
+    private static void Set(string key, JsonNode value)
     {
         JsonObject json;
         try

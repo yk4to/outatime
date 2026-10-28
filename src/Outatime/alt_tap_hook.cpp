@@ -17,9 +17,11 @@ constexpr DWORD kAltGrFakeCtrlScanCode = 0x21D;
 constexpr UINT WM_UPDATE_MOUSE_HOOK = WM_APP + 1;
 
 HWND g_target = nullptr;
-UINT g_message = 0;
+UINT g_tapMessage = 0;
+UINT g_doubleTapMessage = 0;
 std::atomic<bool> g_leftEnabled = false;
 std::atomic<bool> g_rightEnabled = false;
+std::atomic<DWORD> g_doubleTapMs = 0;
 
 HANDLE g_thread = nullptr;
 DWORD g_threadId = 0;
@@ -29,6 +31,9 @@ HHOOK g_keyboardHook = nullptr;
 HHOOK g_mouseHook = nullptr;
 std::bitset<256> g_pressed;
 DWORD g_candidate = 0;  // VK of the Alt key that may become a tap, or 0.
+// The last tap, so a second press of the same key soon after can undo it.
+DWORD g_lastTapVk = 0;
+DWORD g_lastTapTime = 0;  // KBDLLHOOKSTRUCT::time of its key-up
 
 bool IsWatched(DWORD vk) {
     return (vk == VK_LMENU && g_leftEnabled) || (vk == VK_RMENU && g_rightEnabled);
@@ -108,12 +113,24 @@ LRESULT CALLBACK KeyboardProc(int code, WPARAM wParam, LPARAM lParam) {
     }
 
     const DWORD vk = kb.vkCode;
+    const auto key = static_cast<WPARAM>(vk == VK_LMENU ? AltKey::Left : AltKey::Right);
     const bool down = wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN;
     if (down) {
         const bool repeat = g_pressed[vk];
         if (!repeat) {
-            const bool alone = NoOtherKeysPressed() && !AnyMouseButtonDown();
-            SetCandidate(IsWatched(vk) && alone ? vk : 0);
+            // Pressing the same Alt key again right after a tap means the user wants a
+            // plain Alt (e.g. to open the menu bar): undo the tap and let this press
+            // through untouched. Any other key in between cancels this.
+            const bool doubleTap =
+                vk == g_lastTapVk && IsWatched(vk) && kb.time - g_lastTapTime <= g_doubleTapMs;
+            g_lastTapVk = 0;
+            if (doubleTap) {
+                SetCandidate(0);
+                PostMessageW(g_target, g_doubleTapMessage, key, 0);
+            } else {
+                const bool alone = NoOtherKeysPressed() && !AnyMouseButtonDown();
+                SetCandidate(IsWatched(vk) && alone ? vk : 0);
+            }
         }
         g_pressed[vk] = true;
     } else {
@@ -123,8 +140,9 @@ LRESULT CALLBACK KeyboardProc(int code, WPARAM wParam, LPARAM lParam) {
             // Swallow the real key-up and replay it after the mask key. If that fails,
             // fall back to a plain Alt press.
             if (!AnyMouseButtonDown() && ReplayMaskedAltUp(vk)) {
-                PostMessageW(g_target, g_message,
-                             static_cast<WPARAM>(vk == VK_LMENU ? AltKey::Left : AltKey::Right),
+                g_lastTapVk = vk;
+                g_lastTapTime = kb.time;
+                PostMessageW(g_target, g_tapMessage, key,
                              reinterpret_cast<LPARAM>(GetForegroundWindow()));
                 return 1;
             }
@@ -182,9 +200,10 @@ DWORD WINAPI HookThread(LPVOID param) {
 
 }  // namespace
 
-bool StartAltTapHook(HWND target, UINT message) {
+bool StartAltTapHook(HWND target, UINT tapMessage, UINT doubleTapMessage) {
     g_target = target;
-    g_message = message;
+    g_tapMessage = tapMessage;
+    g_doubleTapMessage = doubleTapMessage;
 
     StartupResult startup{CreateEventW(nullptr, TRUE, FALSE, nullptr), false};
     if (!startup.ready) {
@@ -225,5 +244,7 @@ void SetAltTapKeys(bool left, bool right) {
     g_leftEnabled = left;
     g_rightEnabled = right;
 }
+
+void SetDoubleTapMs(DWORD ms) { g_doubleTapMs = ms; }
 
 }  // namespace outatime

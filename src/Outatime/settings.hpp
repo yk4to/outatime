@@ -21,6 +21,10 @@ enum class FullScreenPause {
 struct Settings {
     Mode mode = Mode::Toggle;
     FullScreenPause pauseInFullScreen = FullScreenPause::Games;
+    // Pressing the same Alt key again within doubleTapMs after a tap undoes the
+    // tap and gives a plain Alt (e.g. for the menu bar).
+    bool doubleTap = true;
+    unsigned doubleTapMs = 200;
 };
 
 // %APPDATA%\Outatime
