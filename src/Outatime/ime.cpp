@@ -4,6 +4,7 @@
 #include <imm.h>
 
 #include <cwchar>
+#include <optional>
 
 #include "diagnostics.hpp"
 
@@ -48,18 +49,66 @@ bool SendImeControl(HWND imeWindow, WPARAM command, LPARAM value, DWORD_PTR* res
 
 const wchar_t* StateName(bool open) { return open ? L"open" : L"closed"; }
 
-}  // namespace
+struct Target {
+    HWND window;     // Focused window, for diagnostics
+    HWND imeWindow;  // Its thread's default IME window
+};
 
-void Apply(Action action, HWND foreground) {
+std::optional<Target> Resolve(HWND foreground) {
     if (!foreground) {
         diagnostics::LogFailure(L"no-foreground-window", nullptr);
+        return std::nullopt;
+    }
+    HWND window = FocusedWindow(foreground);
+    HWND imeWindow = ImmGetDefaultIMEWnd(window);
+    if (!imeWindow) {
+        diagnostics::LogFailure(L"no-ime-window", window);
+        return std::nullopt;
+    }
+    return Target{window, imeWindow};
+}
+
+void SetAndVerify(const Target& target, bool open) {
+    if (!SendImeControl(target.imeWindow, IMC_SETOPENSTATUS, open ? 1 : 0, nullptr, L"set-failed",
+                        target.window)) {
         return;
     }
-    HWND target = FocusedWindow(foreground);
-    HWND imeWindow = ImmGetDefaultIMEWnd(target);
-    if (!imeWindow) {
-        diagnostics::LogFailure(L"no-ime-window", target);
-        return;
+
+    // Read the state back to catch apps that accept the message but ignore it.
+    for (int attempt = 1;; ++attempt) {
+        DWORD_PTR actual = 0;
+        if (!SendImeControl(target.imeWindow, IMC_GETOPENSTATUS, 0, &actual, L"verify-failed",
+                            target.window)) {
+            return;
+        }
+        if ((actual != 0) == open) {
+            return;
+        }
+        if (attempt == kVerifyAttempts) {
+            wchar_t detail[64];
+            swprintf_s(detail, L"expected=%s actual=%s", StateName(open), StateName(actual != 0));
+            diagnostics::LogFailure(L"state-mismatch", target.window, detail);
+            return;
+        }
+        Sleep(kVerifyIntervalMs);
+    }
+}
+
+}  // namespace
+
+std::optional<bool> Apply(Action action, HWND foreground) {
+    const auto target = Resolve(foreground);
+    if (!target) {
+        return std::nullopt;
+    }
+
+    // Read the current state even for On/Off so a double tap can restore it.
+    // On/Off still set the state if this fails, and never skip setting because
+    // the state already looks right: the reading may not match what the user sees.
+    std::optional<bool> previous;
+    if (DWORD_PTR current = 0; SendImeControl(target->imeWindow, IMC_GETOPENSTATUS, 0, &current,
+                                              L"get-failed", target->window)) {
+        previous = current != 0;
     }
 
     bool open = false;
@@ -70,36 +119,20 @@ void Apply(Action action, HWND foreground) {
     case Action::Off:
         open = false;
         break;
-    case Action::Toggle: {
-        DWORD_PTR current = 0;
-        if (!SendImeControl(imeWindow, IMC_GETOPENSTATUS, 0, &current, L"get-failed", target)) {
-            return;
+    case Action::Toggle:
+        if (!previous) {
+            return std::nullopt;
         }
-        open = current == 0;
+        open = !*previous;
         break;
     }
-    }
-    if (!SendImeControl(imeWindow, IMC_SETOPENSTATUS, open ? 1 : 0, nullptr, L"set-failed",
-                        target)) {
-        return;
-    }
+    SetAndVerify(*target, open);
+    return previous;
+}
 
-    // Read the state back to catch apps that accept the message but ignore it.
-    for (int attempt = 1;; ++attempt) {
-        DWORD_PTR actual = 0;
-        if (!SendImeControl(imeWindow, IMC_GETOPENSTATUS, 0, &actual, L"verify-failed", target)) {
-            return;
-        }
-        if ((actual != 0) == open) {
-            return;
-        }
-        if (attempt == kVerifyAttempts) {
-            wchar_t detail[64];
-            swprintf_s(detail, L"expected=%s actual=%s", StateName(open), StateName(actual != 0));
-            diagnostics::LogFailure(L"state-mismatch", target, detail);
-            return;
-        }
-        Sleep(kVerifyIntervalMs);
+void SetOpen(HWND foreground, bool open) {
+    if (const auto target = Resolve(foreground)) {
+        SetAndVerify(*target, open);
     }
 }
 

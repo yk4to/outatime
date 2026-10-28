@@ -3,6 +3,7 @@
 #include <shellapi.h>
 #include <windowsx.h>
 
+#include <optional>
 #include <string>
 
 #include "alt_tap_hook.hpp"
@@ -27,6 +28,7 @@ constexpr wchar_t kAppName[] = L"Outatime";
 constexpr UINT kTrayIconId = 1;
 constexpr UINT WM_TRAYICON = WM_APP + 1;
 constexpr UINT WM_ALT_TAP = WM_APP + 2;
+constexpr UINT WM_ALT_DOUBLE_TAP = WM_APP + 3;
 
 enum MenuId : UINT {
     kMenuSettings = 1,
@@ -59,6 +61,9 @@ HWND g_hwnd = nullptr;
 outatime::Settings g_settings;
 bool g_pausedFromMenu = false;
 Status g_status = Status::Active;
+// What the last tap changed, so a double tap can put it back.
+HWND g_lastTapWindow = nullptr;
+std::optional<bool> g_lastTapPreviousOpen;
 HICON g_activeIcon = nullptr;
 HICON g_pausedIcon = nullptr;
 
@@ -163,6 +168,7 @@ void UpdateStatus() {
     const Status status = CurrentStatus();
     const bool active = status == Status::Active;
     outatime::SetAltTapKeys(active, active && g_settings.mode == Mode::LeftOffRightOn);
+    outatime::SetDoubleTapMs(g_settings.doubleTap ? g_settings.doubleTapMs : 0);
     if (status != g_status) {
         g_status = status;
         NOTIFYICONDATAW nid{};
@@ -185,20 +191,33 @@ void ReloadSettings() {
 
 // `foreground` is the window that was in front when the Alt key was released.
 void OnAltTap(Mode mode, AltKey key, HWND foreground) {
+    std::optional<outatime::ime::Action> action;
     switch (mode) {
     case Mode::Toggle:
         if (key == AltKey::Left) {
-            outatime::ime::Apply(outatime::ime::Action::Toggle, foreground);
+            action = outatime::ime::Action::Toggle;
         }
         break;
     case Mode::LeftOffRightOn:
-        outatime::ime::Apply(
-            key == AltKey::Left ? outatime::ime::Action::Off : outatime::ime::Action::On,
-            foreground);
+        action = key == AltKey::Left ? outatime::ime::Action::Off : outatime::ime::Action::On;
         break;
     case Mode::Disabled:
         break;
     }
+    if (action) {
+        g_lastTapWindow = foreground;
+        g_lastTapPreviousOpen = outatime::ime::Apply(*action, foreground);
+    }
+}
+
+// The user pressed the same Alt key again right after a tap to get a plain Alt,
+// so put the IME back the way it was before the tap.
+void OnAltDoubleTap() {
+    if (g_lastTapPreviousOpen) {
+        outatime::ime::SetOpen(g_lastTapWindow, *g_lastTapPreviousOpen);
+    }
+    g_lastTapWindow = nullptr;
+    g_lastTapPreviousOpen.reset();
 }
 
 std::wstring ExeDirectory() {
@@ -272,6 +291,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
     case WM_ALT_TAP:
         OnAltTap(g_settings.mode, static_cast<AltKey>(wParam), reinterpret_cast<HWND>(lParam));
+        return 0;
+
+    case WM_ALT_DOUBLE_TAP:
+        OnAltDoubleTap();
         return 0;
 
     case WM_TIMER:
@@ -360,7 +383,7 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int) {
     ChangeWindowMessageFilterEx(g_hwnd, g_taskbarCreatedMsg, MSGFLT_ALLOW, nullptr);
 
     UpdateStatus();
-    if (!outatime::StartAltTapHook(g_hwnd, WM_ALT_TAP)) {
+    if (!outatime::StartAltTapHook(g_hwnd, WM_ALT_TAP, WM_ALT_DOUBLE_TAP)) {
         MessageBoxW(nullptr, LoadResourceString(IDS_HOOK_FAILED).c_str(), kAppName,
                     MB_OK | MB_ICONERROR);
         DestroyWindow(g_hwnd);

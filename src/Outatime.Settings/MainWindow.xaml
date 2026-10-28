@@ -53,6 +53,13 @@
                     </ComboBox>
                 </controls:SettingsCard>
 
+                <controls:SettingsCard x:Uid="DoubleTapCard">
+                    <controls:SettingsCard.HeaderIcon>
+                        <FontIcon Glyph="&#xE7A7;" />
+                    </controls:SettingsCard.HeaderIcon>
+                    <ToggleSwitch x:Name="DoubleTapToggle" Toggled="DoubleTapToggle_Toggled" />
+                </controls:SettingsCard>
+
                 <controls:SettingsCard x:Uid="FullScreenCard">
                     <controls:SettingsCard.HeaderIcon>
                         <FontIcon Glyph="&#xE7FC;" />

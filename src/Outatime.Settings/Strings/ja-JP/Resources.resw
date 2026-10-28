@@ -44,6 +44,13 @@
     <value>何もしない</value>
   </data>
 
+  <data name="DoubleTapCard.Header" xml:space="preserve">
+    <value>Alt の 2 回押しで通常の Alt</value>
+  </data>
+  <data name="DoubleTapCard.Description" xml:space="preserve">
+    <value>同じ Alt キーを素早く 2 回押すと、IME の切り替えを取り消して、メニュー バーを開くときなどに通常の Alt として使えます。</value>
+  </data>
+
   <data name="FullScreenCard.Header" xml:space="preserve">
     <value>全画面アプリで一時停止</value>
   </data>

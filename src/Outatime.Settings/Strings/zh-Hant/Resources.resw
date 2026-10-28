@@ -44,6 +44,13 @@
     <value>不執行任何動作</value>
   </data>
 
+  <data name="DoubleTapCard.Header" xml:space="preserve">
+    <value>按兩次 Alt 作為一般 Alt</value>
+  </data>
+  <data name="DoubleTapCard.Description" xml:space="preserve">
+    <value>快速按兩次同一個 Alt 鍵，可取消輸入法切換，並照常使用 Alt，例如開啟功能表列。</value>
+  </data>
+
   <data name="FullScreenCard.Header" xml:space="preserve">
     <value>在全螢幕應用程式中暫停</value>
   </data>
