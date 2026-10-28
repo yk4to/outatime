@@ -10,8 +10,10 @@ FetchContent_MakeAvailable(json)
 # Logic without Win32 dependencies, shared with the unit tests.
 add_library(outatime_core STATIC
     alt_tap_detector.cpp
+    settings.cpp
 )
 target_include_directories(outatime_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(outatime_core PRIVATE nlohmann_json::nlohmann_json)
 target_compile_options(outatime_core PRIVATE /W4 /permissive- /utf-8)
 
 add_executable(Outatime WIN32
@@ -26,7 +28,7 @@ add_executable(Outatime WIN32
     trace.cpp
     ime.cpp
     diagnostics.cpp
-    settings.cpp
+    settings_file.cpp
     Outatime.rc
     Outatime.manifest
 )
@@ -43,7 +45,6 @@ target_compile_options(Outatime PRIVATE /W4 /permissive- /utf-8)
 target_link_libraries(Outatime PRIVATE
     outatime_core
     user32 shell32 imm32 ole32 advapi32 comctl32
-    nlohmann_json::nlohmann_json
 )
 
 # Same layout as the zip: Outatime.exe + settings\Outatime.Settings.exe

@@ -11,6 +11,7 @@
 #include "ime.hpp"
 #include "resource.h"
 #include "settings_app.hpp"
+#include "settings_file.hpp"
 #include "settings_watcher.hpp"
 #include "shared_names.hpp"
 #include "trace.hpp"

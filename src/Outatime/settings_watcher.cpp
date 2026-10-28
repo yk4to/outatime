@@ -2,7 +2,7 @@
 
 #include <filesystem>
 
-#include "settings.hpp"
+#include "settings_file.hpp"
 
 namespace outatime {
 
