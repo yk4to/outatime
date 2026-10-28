@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using Microsoft.UI.Dispatching;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -22,13 +21,11 @@ public sealed partial class MainWindow : Window
 
     private readonly ResourceLoader _resources = new();
     private readonly nint _hwnd;
-    private readonly DispatcherQueueTimer _residentTimer;
+    private readonly ResidentMonitor _resident;
 
     // Set while the code changes a selection, so the change handlers ignore it.
     private bool _updatingSelection;
     private StartupMode _startupMode;
-    // Set while starting or restarting the resident, so the info bars don't flicker.
-    private bool _residentActionInProgress;
 
     public MainWindow()
     {
@@ -56,12 +53,9 @@ public sealed partial class MainWindow : Window
         SetPropW(_hwnd, WindowProperty, 1);
         Closed += (_, _) => RemovePropW(_hwnd, WindowProperty);
 
-        // The resident can start, exit or crash at any time; checking is a single FindWindow call.
+        _resident = new ResidentMonitor(DispatcherQueue);
+        _resident.Changed += (_, _) => UpdateResidentInfoBars();
         UpdateResidentInfoBars();
-        _residentTimer = DispatcherQueue.CreateTimer();
-        _residentTimer.Interval = TimeSpan.FromSeconds(1);
-        _residentTimer.Tick += (_, _) => UpdateResidentInfoBars();
-        _residentTimer.Start();
 
         // The settings file may have been edited while this window was in the background.
         Activated += (_, args) =>
@@ -187,11 +181,7 @@ public sealed partial class MainWindow : Window
 
     private void UpdateResidentInfoBars()
     {
-        if (_residentActionInProgress)
-        {
-            return;
-        }
-        var elevated = ResidentProcess.IsElevated();
+        var elevated = _resident.IsElevated;
         NotRunningInfoBar.IsOpen = elevated is null;
         RestartInfoBar.IsOpen = elevated is not null && elevated != ShouldRunElevated;
         RestartInfoBar.Title = _resources.GetString(ShouldRunElevated ? "RestartElevatedTitle" : "RestartNormalTitle");
@@ -211,10 +201,12 @@ public sealed partial class MainWindow : Window
     private async Task RunResidentActionAsync(Button button, string errorTitleKey, Func<Task> action)
     {
         button.IsEnabled = false;
-        _residentActionInProgress = true;
         try
         {
-            await action();
+            using (_resident.Pause())
+            {
+                await action();
+            }
         }
         catch (Exception ex)
         {
@@ -223,7 +215,6 @@ public sealed partial class MainWindow : Window
         finally
         {
             button.IsEnabled = true;
-            _residentActionInProgress = false;
             UpdateResidentInfoBars();
         }
     }
