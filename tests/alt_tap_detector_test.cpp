@@ -1,0 +1,237 @@
+#include "alt_tap_detector.hpp"
+
+#include <gtest/gtest.h>
+
+#include <cstdint>
+#include <set>
+
+namespace outatime {
+namespace {
+
+constexpr std::uint32_t kVkTab = 0x09;
+constexpr std::uint32_t kVkA = 0x41;
+constexpr std::uint32_t kVkF = 0x46;
+constexpr std::uint32_t kVkX = 0x58;
+constexpr std::uint32_t kVkLeftCtrl = 0xA2;
+constexpr std::uint32_t kVkLeftButton = 0x01;
+constexpr std::uint32_t kVkMask = 0xE8;
+constexpr std::uint32_t kAltGrFakeCtrlScanCode = 0x21D;
+
+// Physical state the test controls. Keys from events are held unless released.
+class FakeInputState final : public InputState {
+public:
+    bool IsDown(std::uint32_t vk) const override { return down.contains(vk); }
+    std::set<std::uint32_t> down;
+};
+
+class AltTapDetectorTest : public testing::Test {
+protected:
+    AltTapDetectorTest() {
+        detector.SetWatchedKeys(true, true);
+        detector.SetDoubleTapMs(200);
+    }
+
+    Decision Down(std::uint32_t vk, std::uint32_t time = 0) {
+        input.down.insert(vk);
+        return detector.OnKey(
+            {.vk = vk, .scanCode = 0, .down = true, .injected = false, .time = time});
+    }
+
+    Decision Up(std::uint32_t vk, std::uint32_t time = 0) {
+        input.down.erase(vk);
+        return detector.OnKey(
+            {.vk = vk, .scanCode = 0, .down = false, .injected = false, .time = time});
+    }
+
+    Decision Tap(std::uint32_t vk, std::uint32_t downTime, std::uint32_t upTime) {
+        EXPECT_EQ(Down(vk, downTime), Decision::PassThrough);
+        return Up(vk, upTime);
+    }
+
+    FakeInputState input;
+    AltTapDetector detector{input};
+};
+
+TEST_F(AltTapDetectorTest, AltAloneIsTap) {
+    EXPECT_EQ(Down(kVkLeftAlt), Decision::PassThrough);
+    EXPECT_TRUE(detector.AltHeld());
+    EXPECT_EQ(Up(kVkLeftAlt), Decision::Tap);
+    EXPECT_FALSE(detector.AltHeld());
+}
+
+TEST_F(AltTapDetectorTest, RightAltAloneIsTap) {
+    EXPECT_EQ(Tap(kVkRightAlt, 0, 50), Decision::Tap);
+}
+
+TEST_F(AltTapDetectorTest, AutoRepeatKeepsTap) {
+    Down(kVkLeftAlt, 0);
+    EXPECT_EQ(Down(kVkLeftAlt, 500), Decision::PassThrough);
+    EXPECT_EQ(Down(kVkLeftAlt, 530), Decision::PassThrough);
+    EXPECT_EQ(Up(kVkLeftAlt, 600), Decision::Tap);
+}
+
+TEST_F(AltTapDetectorTest, KeyDuringAltIsCombination) {
+    Down(kVkLeftAlt);
+    EXPECT_EQ(Down(kVkTab), Decision::PassThrough);
+    EXPECT_FALSE(detector.AltHeld());
+    Up(kVkTab);
+    EXPECT_EQ(Up(kVkLeftAlt), Decision::PassThrough);
+}
+
+TEST_F(AltTapDetectorTest, KeyHeldBeforeAltIsCombination) {
+    Down(kVkLeftCtrl);
+    EXPECT_EQ(Down(kVkLeftAlt), Decision::PassThrough);
+    EXPECT_FALSE(detector.AltHeld());
+    EXPECT_EQ(Up(kVkLeftAlt), Decision::PassThrough);
+}
+
+TEST_F(AltTapDetectorTest, OtherKeyReleasedDuringAltStillCombination) {
+    Down(kVkLeftCtrl);
+    Down(kVkLeftAlt);
+    Up(kVkLeftCtrl);
+    EXPECT_EQ(Up(kVkLeftAlt), Decision::PassThrough);
+}
+
+TEST_F(AltTapDetectorTest, UnwatchedKeyPassesThrough) {
+    detector.SetWatchedKeys(true, false);
+    EXPECT_EQ(Down(kVkRightAlt), Decision::PassThrough);
+    EXPECT_FALSE(detector.AltHeld());
+    EXPECT_EQ(Up(kVkRightAlt), Decision::PassThrough);
+}
+
+TEST_F(AltTapDetectorTest, NothingWatchedWhenPaused) {
+    detector.SetWatchedKeys(false, false);
+    EXPECT_EQ(Tap(kVkLeftAlt, 0, 50), Decision::PassThrough);
+}
+
+TEST_F(AltTapDetectorTest, MissedKeyUpIsRecovered) {
+    // X went down, but its key-up never reached the hook (e.g. on the secure desktop).
+    Down(kVkX);
+    input.down.erase(kVkX);
+    EXPECT_EQ(Tap(kVkLeftAlt, 0, 50), Decision::Tap);
+}
+
+TEST_F(AltTapDetectorTest, MouseInputDuringAltIsCombination) {
+    Down(kVkLeftAlt);
+    detector.OnMouseInput();
+    EXPECT_FALSE(detector.AltHeld());
+    EXPECT_EQ(Up(kVkLeftAlt), Decision::PassThrough);
+}
+
+TEST_F(AltTapDetectorTest, MouseButtonHeldBeforeAltIsCombination) {
+    input.down.insert(kVkLeftButton);
+    EXPECT_EQ(Down(kVkLeftAlt), Decision::PassThrough);
+    EXPECT_FALSE(detector.AltHeld());
+    EXPECT_EQ(Up(kVkLeftAlt), Decision::PassThrough);
+}
+
+TEST_F(AltTapDetectorTest, MouseButtonHeldAtReleaseIsCombination) {
+    Down(kVkLeftAlt);
+    input.down.insert(kVkLeftButton);
+    EXPECT_EQ(Up(kVkLeftAlt), Decision::PassThrough);
+}
+
+TEST_F(AltTapDetectorTest, InjectedKeysAreIgnored) {
+    // Our own mask key (and other tools' input) must not turn a tap into a combination.
+    Down(kVkLeftAlt);
+    EXPECT_EQ(
+        detector.OnKey({.vk = kVkMask, .scanCode = 0, .down = true, .injected = true, .time = 0}),
+        Decision::PassThrough);
+    EXPECT_EQ(Up(kVkLeftAlt), Decision::Tap);
+
+    // Nor does an injected Alt count as a tap.
+    EXPECT_EQ(detector.OnKey(
+                  {.vk = kVkLeftAlt, .scanCode = 0, .down = true, .injected = true, .time = 0}),
+              Decision::PassThrough);
+    EXPECT_FALSE(detector.AltHeld());
+}
+
+TEST_F(AltTapDetectorTest, AltGrFakeCtrlIsIgnored) {
+    const KeyEvent fakeCtrlDown{.vk = kVkLeftCtrl,
+                                .scanCode = kAltGrFakeCtrlScanCode,
+                                .down = true,
+                                .injected = false,
+                                .time = 0};
+    const KeyEvent fakeCtrlUp{.vk = kVkLeftCtrl,
+                              .scanCode = kAltGrFakeCtrlScanCode,
+                              .down = false,
+                              .injected = false,
+                              .time = 0};
+    detector.OnKey(fakeCtrlDown);
+    Down(kVkRightAlt);
+    detector.OnKey(fakeCtrlUp);
+    EXPECT_EQ(Up(kVkRightAlt), Decision::Tap);
+}
+
+TEST_F(AltTapDetectorTest, QuickSecondPressIsDoubleTap) {
+    EXPECT_EQ(Tap(kVkLeftAlt, 0, 50), Decision::Tap);
+    EXPECT_EQ(Down(kVkLeftAlt, 250), Decision::DoubleTap);
+    EXPECT_FALSE(detector.AltHeld());
+    // The second press is a plain Alt: its release is not a tap.
+    EXPECT_EQ(Up(kVkLeftAlt, 300), Decision::PassThrough);
+}
+
+TEST_F(AltTapDetectorTest, DoubleTapThenKeyIsPlainAltCombination) {
+    Tap(kVkLeftAlt, 0, 50);
+    EXPECT_EQ(Down(kVkLeftAlt, 100), Decision::DoubleTap);
+    EXPECT_EQ(Down(kVkF, 150), Decision::PassThrough);
+    Up(kVkF, 200);
+    EXPECT_EQ(Up(kVkLeftAlt, 250), Decision::PassThrough);
+}
+
+TEST_F(AltTapDetectorTest, SlowSecondPressIsAnotherTap) {
+    Tap(kVkLeftAlt, 0, 50);
+    EXPECT_EQ(Down(kVkLeftAlt, 251), Decision::PassThrough);
+    EXPECT_EQ(Up(kVkLeftAlt, 300), Decision::Tap);
+}
+
+TEST_F(AltTapDetectorTest, ThirdQuickPressIsATapAgain) {
+    Tap(kVkLeftAlt, 0, 50);
+    Down(kVkLeftAlt, 100);
+    Up(kVkLeftAlt, 150);
+    EXPECT_EQ(Down(kVkLeftAlt, 200), Decision::PassThrough);
+    EXPECT_EQ(Up(kVkLeftAlt, 250), Decision::Tap);
+}
+
+TEST_F(AltTapDetectorTest, KeyBetweenTapsCancelsDoubleTap) {
+    Tap(kVkLeftAlt, 0, 50);
+    Down(kVkA, 60);
+    Up(kVkA, 70);
+    EXPECT_EQ(Down(kVkLeftAlt, 100), Decision::PassThrough);
+    EXPECT_EQ(Up(kVkLeftAlt, 150), Decision::Tap);
+}
+
+TEST_F(AltTapDetectorTest, OtherAltKeyIsNotDoubleTap) {
+    Tap(kVkLeftAlt, 0, 50);
+    EXPECT_EQ(Down(kVkRightAlt, 100), Decision::PassThrough);
+    EXPECT_EQ(Up(kVkRightAlt, 150), Decision::Tap);
+}
+
+TEST_F(AltTapDetectorTest, ZeroDoubleTapTimeTurnsDoubleTapOff) {
+    detector.SetDoubleTapMs(0);
+    Tap(kVkLeftAlt, 0, 50);
+    // Even a press with the same timestamp as the tap's release.
+    EXPECT_EQ(Down(kVkLeftAlt, 50), Decision::PassThrough);
+    EXPECT_EQ(Up(kVkLeftAlt, 60), Decision::Tap);
+}
+
+TEST_F(AltTapDetectorTest, TapNotReplayedDoesNotArmDoubleTap) {
+    Tap(kVkLeftAlt, 0, 50);
+    detector.OnTapNotReplayed();
+    EXPECT_EQ(Down(kVkLeftAlt, 100), Decision::PassThrough);
+    EXPECT_EQ(Up(kVkLeftAlt, 150), Decision::Tap);
+}
+
+TEST_F(AltTapDetectorTest, DoubleTapNeedsWatchedKey) {
+    Tap(kVkLeftAlt, 0, 50);
+    detector.SetWatchedKeys(false, false);
+    EXPECT_EQ(Down(kVkLeftAlt, 100), Decision::PassThrough);
+}
+
+TEST_F(AltTapDetectorTest, DoubleTapAcrossTimerWraparound) {
+    Tap(kVkLeftAlt, 0xFFFFFF00, 0xFFFFFFF0);
+    EXPECT_EQ(Down(kVkLeftAlt, 0x00000010), Decision::DoubleTap);
+}
+
+}  // namespace
+}  // namespace outatime

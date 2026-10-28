@@ -9,6 +9,7 @@ Requires Visual Studio 2026 with the "Desktop development with C++" and "WinUI a
 ```powershell
 cmake --preset default
 cmake --build --preset debug
+ctest --preset debug
 dotnet build src/Outatime.Settings
 ```
 
