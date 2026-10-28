@@ -6,7 +6,7 @@ using Microsoft.Windows.ApplicationModel.Resources;
 namespace Outatime.Settings;
 
 // Talks to the running resident process (Outatime.exe) through its hidden window.
-// The names below must match main.cpp.
+// The names below must match shared_names.hpp.
 internal static partial class ResidentProcess
 {
     private const string WindowClass = "Outatime.Resident";
