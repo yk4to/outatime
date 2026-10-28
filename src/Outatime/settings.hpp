@@ -1,7 +1,7 @@
 #pragma once
 
-#include <filesystem>
 #include <optional>
+#include <string_view>
 
 namespace outatime {
 
@@ -27,11 +27,9 @@ struct Settings {
     unsigned doubleTapMs = 200;
 };
 
-// %APPDATA%\Outatime
-std::filesystem::path SettingsDirectory();
-
-// Returns defaults if settings.json does not exist, or nullopt if it exists
-// but cannot be read or parsed. Unknown or invalid values fall back to defaults.
-std::optional<Settings> LoadSettings();
+// Parses the contents of settings.json. Returns nullopt if it is not a JSON
+// object; unknown keys are ignored and unknown or invalid values fall back to
+// their defaults, so a file from a newer or older version still loads.
+std::optional<Settings> ParseSettings(std::string_view json);
 
 }  // namespace outatime
