@@ -8,5 +8,5 @@ trim_trailing_whitespace = true
 indent_style = space
 indent_size = 4
 
-[*.{json,yml,yaml,md}]
+[{*.{json,yml,yaml,md,csproj,resw,manifest},.clang-format,.clang-tidy}]
 indent_size = 2

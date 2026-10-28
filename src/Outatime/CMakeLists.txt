@@ -14,7 +14,7 @@ add_library(outatime_core STATIC
 )
 target_include_directories(outatime_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(outatime_core PRIVATE nlohmann_json::nlohmann_json)
-target_compile_options(outatime_core PRIVATE /W4 /permissive- /utf-8)
+target_compile_options(outatime_core PRIVATE ${OUTATIME_COMPILE_OPTIONS})
 
 add_executable(Outatime WIN32
     main.cpp
@@ -40,7 +40,7 @@ target_compile_definitions(Outatime PRIVATE
     NOMINMAX
 )
 
-target_compile_options(Outatime PRIVATE /W4 /permissive- /utf-8)
+target_compile_options(Outatime PRIVATE ${OUTATIME_COMPILE_OPTIONS})
 
 target_link_libraries(Outatime PRIVATE
     outatime_core

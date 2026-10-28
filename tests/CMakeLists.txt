@@ -13,7 +13,7 @@ add_executable(outatime_tests
     alt_tap_detector_test.cpp
     settings_test.cpp
 )
-target_compile_options(outatime_tests PRIVATE /W4 /permissive- /utf-8)
+target_compile_options(outatime_tests PRIVATE ${OUTATIME_COMPILE_OPTIONS})
 target_link_libraries(outatime_tests PRIVATE outatime_core GTest::gtest_main)
 
 include(GoogleTest)

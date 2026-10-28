@@ -86,9 +86,9 @@ int App::Run() {
                          instance_, this)) {
         return 1;
     }
-    tray_.emplace(hwnd_, kTrayIconId, WM_TRAYICON);
+    TrayIcon& tray = tray_.emplace(hwnd_, kTrayIconId, WM_TRAYICON);
     UpdateTrayIcon();
-    tray_->Add();
+    tray.Add();
 
     // Tell the settings app whether we run elevated, and let it close us (to restart
     // with the other privilege level) and Explorer reach us even when we do.
@@ -175,6 +175,8 @@ LRESULT App::HandleMessage(UINT msg, WPARAM wParam, LPARAM lParam) {
         case WM_CONTEXTMENU:
             ShowTrayMenu({GET_X_LPARAM(wParam), GET_Y_LPARAM(wParam)});
             break;
+        default:
+            break;
         }
         return 0;
 
@@ -242,6 +244,8 @@ void App::OnTimer(UINT_PTR id) {
         break;
     }
 #endif
+    default:
+        break;
     }
 }
 
@@ -258,10 +262,15 @@ void App::OnCommand(UINT id) {
         CloseSettingsApp();
         DestroyWindow(hwnd_);
         break;
+    default:
+        break;
     }
 }
 
 void App::ShowTrayMenu(POINT point) {
+    if (!tray_) {
+        return;
+    }
     HMENU menu = CreatePopupMenu();
     AppendMenuW(menu, MF_STRING, kMenuSettings, LoadResourceString(IDS_MENU_SETTINGS).c_str());
     AppendMenuW(menu, MF_STRING | (pausedFromMenu_ ? MF_CHECKED : MF_UNCHECKED), kMenuPause,
@@ -299,7 +308,11 @@ void App::UpdateStatus() {
     }
 }
 
+// Does nothing until the tray icon exists, i.e. before the window is created.
 void App::UpdateTrayIcon() {
+    if (!tray_) {
+        return;
+    }
     std::wstring tooltip = kAppName;
     switch (status_) {
     case Status::Active:

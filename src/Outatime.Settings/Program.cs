@@ -22,11 +22,12 @@ public static partial class Program
             return;
         }
 
-        Application.Start(_ =>
+        Application.Start(callbackParams =>
         {
             var context = new DispatcherQueueSynchronizationContext(DispatcherQueue.GetForCurrentThread());
             SynchronizationContext.SetSynchronizationContext(context);
-            new App();
+            // The app keeps itself alive through Application.Current.
+            _ = new App();
         });
     }
 

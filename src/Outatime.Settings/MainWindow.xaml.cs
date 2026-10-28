@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using Microsoft.UI.Dispatching;
@@ -98,7 +99,7 @@ public sealed partial class MainWindow : Window
     {
         var assembly = Assembly.GetExecutingAssembly();
         var version = assembly.GetName().Version!.ToString(3);
-        AboutCard.Description = string.Format(_resources.GetString("AboutVersion"), version);
+        AboutCard.Description = string.Format(CultureInfo.CurrentCulture, _resources.GetString("AboutVersion"), version);
 
         // The .NET SDK appends the git commit to the informational version: "0.1.0+<sha>".
         var informational = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;

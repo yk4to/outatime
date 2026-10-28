@@ -12,6 +12,10 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <!-- GitHub Actions sets CI=true: warnings fail CI without stopping local builds. -->
+    <TreatWarningsAsErrors Condition="'$(CI)' == 'true'">true</TreatWarningsAsErrors>
     <Version>0.1.0</Version>
     <DefaultLanguage>en-US</DefaultLanguage>
     <!-- Program.Main handles single-instance redirection before starting XAML. -->
