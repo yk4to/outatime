@@ -32,14 +32,21 @@ enum class Decision {
     DoubleTap,    // This key-down repeats a tap: let it through as a plain Alt, report it.
 };
 
-// Decides which Alt presses are taps (pressed and released with no other key
-// or mouse button in between) and double taps, from low-level input events.
+// Decides which Alt presses are taps and double taps, from low-level input events.
+//
+// A tap is an Alt key released within kTapTimeoutMs with no other key pressed
+// and no mouse button used meanwhile. Keys already held when Alt goes down are
+// fine if they are let go first (fast typing often overlaps), except modifiers.
 // It has no Win32 dependencies so it can be unit tested.
 //
 // OnKey, OnMouseInput and OnTapNotReplayed must be called from one thread;
 // the setters may be called from any thread.
 class AltTapDetector {
 public:
+    // Holding Alt longer than this and letting go is not a tap, as when the user
+    // changes their mind. Same as Karabiner-Elements' to_if_alone default.
+    static constexpr std::uint32_t kTapTimeoutMs = 1000;
+
     explicit AltTapDetector(const InputState& input) : input_(input) {}
 
     // Which Alt keys to watch. Other Alt keys always pass through.
@@ -60,7 +67,8 @@ public:
 
 private:
     bool IsWatched(std::uint32_t vk) const;
-    bool NoOtherKeysPressed();
+    void DropReleasedKeys();
+    bool AnyModifierPressed() const;
     bool AnyMouseButtonDown() const;
 
     const InputState& input_;
@@ -69,8 +77,9 @@ private:
     std::atomic<std::uint32_t> doubleTapMs_ = 0;
 
     std::bitset<256> pressed_;
-    std::uint32_t candidate_ = 0;  // VK of the Alt key that may become a tap, or 0
-    std::uint32_t lastTapVk_ = 0;  // The last tap, so a quick second press can undo it
+    std::uint32_t candidate_ = 0;      // VK of the Alt key that may become a tap, or 0
+    std::uint32_t candidateTime_ = 0;  // When it went down
+    std::uint32_t lastTapVk_ = 0;      // The last tap, so a quick second press can undo it
     std::uint32_t lastTapTime_ = 0;
 };
 
