@@ -20,10 +20,10 @@
     <value>設定</value>
   </data>
   <data name="NotRunningInfoBar.Title" xml:space="preserve">
-    <value>Outatime が起動していません</value>
+    <value>Outatime がバックグラウンドで実行されていません</value>
   </data>
   <data name="NotRunningInfoBar.Message" xml:space="preserve">
-    <value>Alt キーで IME を切り替えるには起動してください。</value>
+    <value>実行されていない間は、Alt キーで IME を切り替えられません。</value>
   </data>
   <data name="StartButton.Content" xml:space="preserve">
     <value>起動</value>
