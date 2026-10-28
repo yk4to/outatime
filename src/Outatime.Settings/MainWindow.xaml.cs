@@ -16,7 +16,7 @@ public sealed partial class MainWindow : Window
     private const int DefaultWidth = 640;
     private const int DefaultHeight = 520;
     private const int ErrorCancelled = 1223;
-    // The resident process closes windows with this property when the user exits it (main.cpp).
+    // The resident process closes windows with this property when the user exits it (settings_app.cpp).
     private const string WindowProperty = "Outatime.Settings";
 
     private readonly ResourceLoader _resources = new();

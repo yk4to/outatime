@@ -16,6 +16,12 @@ target_compile_options(outatime_core PRIVATE /W4 /permissive- /utf-8)
 
 add_executable(Outatime WIN32
     main.cpp
+    app.cpp
+    full_screen.cpp
+    settings_app.cpp
+    settings_watcher.cpp
+    tray_icon.cpp
+    win_util.cpp
     alt_tap_hook.cpp
     trace.cpp
     ime.cpp
