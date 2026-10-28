@@ -43,6 +43,22 @@
   <data name="ModeDisabled.Content" xml:space="preserve">
     <value>不執行任何動作</value>
   </data>
+
+  <data name="FullScreenCard.Header" xml:space="preserve">
+    <value>在全螢幕應用程式中暫停</value>
+  </data>
+  <data name="FullScreenCard.Description" xml:space="preserve">
+    <value>讓遊戲可以正常使用 Alt 鍵。「所有全螢幕應用程式」也包括 Windows 判定為全螢幕的其他應用程式。</value>
+  </data>
+  <data name="FullScreenOff.Content" xml:space="preserve">
+    <value>關閉</value>
+  </data>
+  <data name="FullScreenGames.Content" xml:space="preserve">
+    <value>僅限全螢幕遊戲</value>
+  </data>
+  <data name="FullScreenAll.Content" xml:space="preserve">
+    <value>所有全螢幕應用程式</value>
+  </data>
   <data name="StartupCard.Header" xml:space="preserve">
     <value>登入時啟動</value>
   </data>

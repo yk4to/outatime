@@ -11,8 +11,16 @@ enum class Mode {
     Disabled,
 };
 
+// When to step aside so full-screen apps (mostly games) get the Alt key as is.
+enum class FullScreenPause {
+    Off,
+    Games,  // Exclusive full-screen Direct3D apps (QUNS_RUNNING_D3D_FULL_SCREEN)
+    All,    // Also whatever else the shell reports as full screen (QUNS_BUSY)
+};
+
 struct Settings {
     Mode mode = Mode::Toggle;
+    FullScreenPause pauseInFullScreen = FullScreenPause::Games;
 };
 
 // %APPDATA%\Outatime

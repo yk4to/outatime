@@ -43,10 +43,27 @@
                     <controls:SettingsCard.HeaderIcon>
                         <FontIcon Glyph="&#xE765;" />
                     </controls:SettingsCard.HeaderIcon>
-                    <ComboBox x:Name="ModeComboBox" SelectionChanged="ModeComboBox_SelectionChanged">
+                    <ComboBox
+                        x:Name="ModeComboBox"
+                        SelectionChanged="SettingComboBox_SelectionChanged"
+                        Tag="mode">
                         <ComboBoxItem x:Uid="ModeToggle" Tag="toggle" />
                         <ComboBoxItem x:Uid="ModeLeftOffRightOn" Tag="leftOffRightOn" />
                         <ComboBoxItem x:Uid="ModeDisabled" Tag="disabled" />
+                    </ComboBox>
+                </controls:SettingsCard>
+
+                <controls:SettingsCard x:Uid="FullScreenCard">
+                    <controls:SettingsCard.HeaderIcon>
+                        <FontIcon Glyph="&#xE7FC;" />
+                    </controls:SettingsCard.HeaderIcon>
+                    <ComboBox
+                        x:Name="FullScreenComboBox"
+                        SelectionChanged="SettingComboBox_SelectionChanged"
+                        Tag="pauseInFullScreen">
+                        <ComboBoxItem x:Uid="FullScreenOff" Tag="off" />
+                        <ComboBoxItem x:Uid="FullScreenGames" Tag="games" />
+                        <ComboBoxItem x:Uid="FullScreenAll" Tag="all" />
                     </ComboBox>
                 </controls:SettingsCard>
 

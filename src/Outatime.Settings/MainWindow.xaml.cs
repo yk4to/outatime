@@ -47,7 +47,7 @@ public sealed partial class MainWindow : Window
         _updatingSelection = true;
         StartupComboBox.SelectedIndex = (int)_startupMode;
         _updatingSelection = false;
-        LoadMode();
+        LoadSettingsFile();
 
         SettingsFileCard.Description = SettingsStore.FilePath;
         ShowBuildInfo();
@@ -67,17 +67,27 @@ public sealed partial class MainWindow : Window
         {
             if (args.WindowActivationState != WindowActivationState.Deactivated)
             {
-                LoadMode();
+                LoadSettingsFile();
             }
         };
     }
 
-    private void LoadMode()
+    private void LoadSettingsFile()
     {
-        var mode = SettingsStore.LoadMode();
+        Select(ModeComboBox, SettingsStore.Get(SettingsStore.ModeKey, SettingsStore.DefaultMode),
+            SettingsStore.DefaultMode);
+        Select(FullScreenComboBox,
+            SettingsStore.Get(SettingsStore.FullScreenPauseKey, SettingsStore.DefaultFullScreenPause),
+            SettingsStore.DefaultFullScreenPause);
+    }
+
+    // Selects the item whose Tag is `value`, or `defaultValue` for unknown values.
+    private void Select(ComboBox box, string value, string defaultValue)
+    {
+        var items = box.Items.OfType<ComboBoxItem>().ToList();
         _updatingSelection = true;
-        ModeComboBox.SelectedItem = ModeComboBox.Items.OfType<ComboBoxItem>()
-            .FirstOrDefault(item => (string)item.Tag == mode) ?? ModeComboBox.Items[0];
+        box.SelectedItem = items.FirstOrDefault(item => (string)item.Tag == value)
+            ?? items.First(item => (string)item.Tag == defaultValue);
         _updatingSelection = false;
     }
 
@@ -108,15 +118,17 @@ public sealed partial class MainWindow : Window
         SetForegroundWindow(_hwnd);
     }
 
-    private async void ModeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    // For combo boxes backed by settings.json: the box's Tag is the key, each item's Tag the value.
+    private async void SettingComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (_updatingSelection || ModeComboBox.SelectedItem is not ComboBoxItem { Tag: string mode })
+        if (_updatingSelection ||
+            sender is not ComboBox { Tag: string key, SelectedItem: ComboBoxItem { Tag: string value } })
         {
             return;
         }
         try
         {
-            SettingsStore.SaveMode(mode);
+            SettingsStore.Set(key, value);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {

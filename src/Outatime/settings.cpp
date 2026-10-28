@@ -23,6 +23,19 @@ std::optional<Mode> ParseMode(const std::string& value) {
     return std::nullopt;
 }
 
+std::optional<FullScreenPause> ParseFullScreenPause(const std::string& value) {
+    if (value == "off") {
+        return FullScreenPause::Off;
+    }
+    if (value == "games") {
+        return FullScreenPause::Games;
+    }
+    if (value == "all") {
+        return FullScreenPause::All;
+    }
+    return std::nullopt;
+}
+
 }  // namespace
 
 std::filesystem::path SettingsDirectory() {
@@ -55,6 +68,10 @@ std::optional<Settings> LoadSettings() {
     Settings settings;
     if (const auto it = json.find("mode"); it != json.end() && it->is_string()) {
         settings.mode = ParseMode(it->get<std::string>()).value_or(settings.mode);
+    }
+    if (const auto it = json.find("pauseInFullScreen"); it != json.end() && it->is_string()) {
+        settings.pauseInFullScreen =
+            ParseFullScreenPause(it->get<std::string>()).value_or(settings.pauseInFullScreen);
     }
     return settings;
 }

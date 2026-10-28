@@ -46,6 +46,22 @@
     <value>Do nothing</value>
   </data>
 
+  <data name="FullScreenCard.Header" xml:space="preserve">
+    <value>Pause in full-screen apps</value>
+  </data>
+  <data name="FullScreenCard.Description" xml:space="preserve">
+    <value>Lets games use the Alt key as usual. "All full-screen apps" also includes other apps that Windows reports as full screen.</value>
+  </data>
+  <data name="FullScreenOff.Content" xml:space="preserve">
+    <value>Off</value>
+  </data>
+  <data name="FullScreenGames.Content" xml:space="preserve">
+    <value>Full-screen games only</value>
+  </data>
+  <data name="FullScreenAll.Content" xml:space="preserve">
+    <value>All full-screen apps</value>
+  </data>
+
   <data name="StartupCard.Header" xml:space="preserve">
     <value>Start at sign-in</value>
   </data>

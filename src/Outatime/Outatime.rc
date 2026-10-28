@@ -4,14 +4,22 @@
 
 #include "resource.h"
 
-// English is neutral so it is the fallback for any other UI language.
 LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
+IDI_APP ICON "icons/outatime.ico"
+IDI_PAUSED ICON "icons/outatime-paused.ico"
+
+// Not LANG_NEUTRAL: LoadString takes a neutral string over the one for the UI language.
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 STRINGTABLE
 BEGIN
     IDS_MENU_SETTINGS "&Settings..."
     IDS_MENU_EXIT "E&xit"
     IDS_SETTINGS_NOT_FOUND "Settings app not found:\n"
     IDS_HOOK_FAILED "Failed to install the keyboard hook."
+    IDS_MENU_PAUSE "&Pause"
+    IDS_TIP_PAUSED "Outatime (paused)"
+    IDS_TIP_FULL_SCREEN "Outatime (paused in full screen)"
+    IDS_TIP_OFF "Outatime (off)"
 END
 
 LANGUAGE LANG_JAPANESE, SUBLANG_JAPANESE_JAPAN
@@ -21,6 +29,10 @@ BEGIN
     IDS_MENU_EXIT "終了(&X)"
     IDS_SETTINGS_NOT_FOUND "設定アプリが見つかりません:\n"
     IDS_HOOK_FAILED "キーボード フックを設定できませんでした。"
+    IDS_MENU_PAUSE "一時停止(&P)"
+    IDS_TIP_PAUSED "Outatime (一時停止中)"
+    IDS_TIP_FULL_SCREEN "Outatime (全画面のため一時停止中)"
+    IDS_TIP_OFF "Outatime (オフ)"
 END
 
 LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
@@ -30,6 +42,10 @@ BEGIN
     IDS_MENU_EXIT "退出(&X)"
     IDS_SETTINGS_NOT_FOUND "找不到设置应用：\n"
     IDS_HOOK_FAILED "无法安装键盘挂钩。"
+    IDS_MENU_PAUSE "暂停(&P)"
+    IDS_TIP_PAUSED "Outatime（已暂停）"
+    IDS_TIP_FULL_SCREEN "Outatime（全屏时已暂停）"
+    IDS_TIP_OFF "Outatime（已关闭）"
 END
 
 LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_TRADITIONAL
@@ -39,6 +55,10 @@ BEGIN
     IDS_MENU_EXIT "結束(&X)"
     IDS_SETTINGS_NOT_FOUND "找不到設定應用程式：\n"
     IDS_HOOK_FAILED "無法安裝鍵盤勾點。"
+    IDS_MENU_PAUSE "暫停(&P)"
+    IDS_TIP_PAUSED "Outatime（已暫停）"
+    IDS_TIP_FULL_SCREEN "Outatime（全螢幕時已暫停）"
+    IDS_TIP_OFF "Outatime（已關閉）"
 END
 
 LANGUAGE LANG_KOREAN, SUBLANG_KOREAN
@@ -48,4 +68,8 @@ BEGIN
     IDS_MENU_EXIT "끝내기(&X)"
     IDS_SETTINGS_NOT_FOUND "설정 앱을 찾을 수 없습니다.\n"
     IDS_HOOK_FAILED "키보드 후크를 설치할 수 없습니다."
+    IDS_MENU_PAUSE "일시 중지(&P)"
+    IDS_TIP_PAUSED "Outatime(일시 중지됨)"
+    IDS_TIP_FULL_SCREEN "Outatime(전체 화면이라 일시 중지됨)"
+    IDS_TIP_OFF "Outatime(꺼짐)"
 END

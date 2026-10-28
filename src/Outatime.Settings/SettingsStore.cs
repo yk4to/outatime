@@ -6,7 +6,11 @@ namespace Outatime.Settings;
 // Reads and writes %APPDATA%\Outatime\settings.json, which the resident process watches.
 internal static class SettingsStore
 {
+    // Keys, values and defaults must match settings.hpp/.cpp in the resident process.
+    public const string ModeKey = "mode";
     public const string DefaultMode = "toggle";
+    public const string FullScreenPauseKey = "pauseInFullScreen";
+    public const string DefaultFullScreenPause = "games";
 
     private static readonly string SettingsDirectory = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Outatime");
@@ -18,26 +22,26 @@ internal static class SettingsStore
     {
         if (!File.Exists(FilePath))
         {
-            SaveMode(LoadMode());
+            Set(ModeKey, Get(ModeKey, DefaultMode));
         }
     }
 
-    public static string LoadMode()
+    public static string Get(string key, string defaultValue)
     {
         try
         {
-            if (Load()["mode"] is JsonValue value && value.TryGetValue(out string? mode))
+            if (Load()[key] is JsonValue value && value.TryGetValue(out string? text))
             {
-                return mode;
+                return text;
             }
         }
         catch (Exception ex) when (ex is IOException or JsonException)
         {
         }
-        return DefaultMode;
+        return defaultValue;
     }
 
-    public static void SaveMode(string mode)
+    public static void Set(string key, string value)
     {
         JsonObject json;
         try
@@ -49,7 +53,7 @@ internal static class SettingsStore
             json = [];
         }
         // Keep keys we don't know about.
-        json["mode"] = mode;
+        json[key] = value;
 
         Directory.CreateDirectory(SettingsDirectory);
         // Write to a temporary file and swap it in, so the resident process never reads a partial file.
