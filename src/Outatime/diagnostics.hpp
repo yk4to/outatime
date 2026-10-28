@@ -2,9 +2,13 @@
 
 #include <windows.h>
 
+#include <filesystem>
 #include <string_view>
 
 namespace outatime::diagnostics {
+
+// %LOCALAPPDATA%\Outatime, where logs go.
+std::filesystem::path LogDirectory();
 
 // Records a failure to %LOCALAPPDATA%\Outatime\diagnostics.log and the debugger
 // output, along with the process name and window class of `window` (never its

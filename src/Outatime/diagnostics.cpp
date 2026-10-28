@@ -7,10 +7,6 @@
 #include <string>
 
 namespace outatime::diagnostics {
-namespace {
-
-// Keep the log small: once it grows past this, the previous one is kept as .old.
-constexpr ULONGLONG kMaxLogBytes = 64 * 1024;
 
 // Not under %APPDATA%\Outatime: the resident watches that directory for settings changes.
 std::filesystem::path LogDirectory() {
@@ -23,6 +19,11 @@ std::filesystem::path LogDirectory() {
     CoTaskMemFree(localAppData);
     return path;
 }
+
+namespace {
+
+// Keep the log small: once it grows past this, the previous one is kept as .old.
+constexpr ULONGLONG kMaxLogBytes = 64 * 1024;
 
 std::wstring ProcessName(HWND window) {
     DWORD processId = 0;

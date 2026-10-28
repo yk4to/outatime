@@ -12,13 +12,23 @@ enum class Action {
     Off,
 };
 
+struct ApplyResult {
+    std::optional<bool> previous;   // Open state before the change, so it can be restored
+    std::optional<bool> requested;  // Open state that was set, if any
+};
+
 // Changes the IME open state of the focused window in `foreground`'s thread,
-// then reads it back. Returns the state from before the change, so it can be
-// restored, or nullopt if it could not be read. Failures are written to the
-// diagnostics log.
-std::optional<bool> Apply(Action action, HWND foreground);
+// then reads it back. Failures are written to the diagnostics log.
+ApplyResult Apply(Action action, HWND foreground);
 
 // Sets the IME open state of the focused window in `foreground`'s thread.
 void SetOpen(HWND foreground, bool open);
+
+// Reads the IME open state of the focused window in `foreground`'s thread.
+std::optional<bool> GetOpen(HWND foreground);
+
+// Logs "state-reverted" if the IME open state is no longer `expected`, which
+// catches apps that accept a change and undo it shortly after.
+void Recheck(HWND foreground, bool expected);
 
 }  // namespace outatime::ime
