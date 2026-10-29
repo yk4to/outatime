@@ -123,11 +123,17 @@
   <data name="AboutHeader.Text" xml:space="preserve">
     <value>정보</value>
   </data>
-  <data name="AboutCard.Header" xml:space="preserve">
+  <data name="AboutExpander.Header" xml:space="preserve">
     <value>Outatime</value>
   </data>
   <data name="AboutVersion" xml:space="preserve">
     <value>버전 {0}</value>
+  </data>
+  <data name="LicenseCard.Header" xml:space="preserve">
+    <value>Outatime은 MIT 라이선스로 개발되고 있습니다</value>
+  </data>
+  <data name="RepositoryButton.Content" xml:space="preserve">
+    <value>GitHub 저장소</value>
   </data>
   <data name="SaveErrorTitle" xml:space="preserve">
     <value>설정을 저장할 수 없습니다</value>

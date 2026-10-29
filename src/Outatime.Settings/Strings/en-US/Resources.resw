@@ -130,11 +130,17 @@
   <data name="AboutHeader.Text" xml:space="preserve">
     <value>About</value>
   </data>
-  <data name="AboutCard.Header" xml:space="preserve">
+  <data name="AboutExpander.Header" xml:space="preserve">
     <value>Outatime</value>
   </data>
   <data name="AboutVersion" xml:space="preserve">
     <value>Version {0}</value>
+  </data>
+  <data name="LicenseCard.Header" xml:space="preserve">
+    <value>Outatime is developed under the MIT License</value>
+  </data>
+  <data name="RepositoryButton.Content" xml:space="preserve">
+    <value>GitHub repository</value>
   </data>
 
   <data name="SaveErrorTitle" xml:space="preserve">

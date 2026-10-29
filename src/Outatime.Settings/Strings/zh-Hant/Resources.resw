@@ -123,11 +123,17 @@
   <data name="AboutHeader.Text" xml:space="preserve">
     <value>關於</value>
   </data>
-  <data name="AboutCard.Header" xml:space="preserve">
+  <data name="AboutExpander.Header" xml:space="preserve">
     <value>Outatime</value>
   </data>
   <data name="AboutVersion" xml:space="preserve">
     <value>版本 {0}</value>
+  </data>
+  <data name="LicenseCard.Header" xml:space="preserve">
+    <value>Outatime 依據 MIT 授權條款開發</value>
+  </data>
+  <data name="RepositoryButton.Content" xml:space="preserve">
+    <value>GitHub 存放庫</value>
   </data>
   <data name="SaveErrorTitle" xml:space="preserve">
     <value>無法儲存設定</value>

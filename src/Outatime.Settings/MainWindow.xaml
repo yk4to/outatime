@@ -148,16 +148,21 @@
                     Margin="1,28,0,4"
                     Style="{StaticResource BodyStrongTextBlockStyle}" />
 
-                <controls:SettingsCard x:Name="AboutCard" x:Uid="AboutCard">
-                    <controls:SettingsCard.HeaderIcon>
-                        <FontIcon Glyph="&#xE946;" />
-                    </controls:SettingsCard.HeaderIcon>
+                <controls:SettingsExpander x:Name="AboutExpander" x:Uid="AboutExpander" IsExpanded="True">
+                    <controls:SettingsExpander.HeaderIcon>
+                        <ImageIcon Source="ms-appx:///Assets/outatime.png" />
+                    </controls:SettingsExpander.HeaderIcon>
                     <!-- Selectable so it can be copied into bug reports. -->
                     <TextBlock
                         x:Name="BuildInfoText"
                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                         IsTextSelectionEnabled="True" />
-                </controls:SettingsCard>
+                    <controls:SettingsExpander.Items>
+                        <controls:SettingsCard x:Uid="LicenseCard">
+                            <HyperlinkButton x:Uid="RepositoryButton" NavigateUri="https://github.com/yk4to/outatime" />
+                        </controls:SettingsCard>
+                    </controls:SettingsExpander.Items>
+                </controls:SettingsExpander>
             </StackPanel>
         </ScrollViewer>
     </Grid>
