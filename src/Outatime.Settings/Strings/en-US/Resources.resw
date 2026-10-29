@@ -20,6 +20,12 @@
     <value>Settings</value>
   </data>
 
+  <data name="BuildMismatchInfoBar.Title" xml:space="preserve">
+    <value>Outatime running in the background is a different version</value>
+  </data>
+  <data name="BuildMismatchInfoBar.Message" xml:space="preserve">
+    <value>It's a different version from these settings. Restart it to switch to the same version.</value>
+  </data>
   <data name="NotRunningInfoBar.Title" xml:space="preserve">
     <value>Outatime isn't running in the background</value>
   </data>

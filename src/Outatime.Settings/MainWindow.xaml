@@ -27,6 +27,18 @@
                     Margin="0,0,0,20"
                     Style="{StaticResource TitleTextBlockStyle}" />
 
+                <!-- Shown when the running resident was built from a different commit than this app. -->
+                <InfoBar
+                    x:Name="BuildMismatchInfoBar"
+                    x:Uid="BuildMismatchInfoBar"
+                    Margin="0,0,0,8"
+                    IsClosable="False"
+                    Severity="Warning">
+                    <InfoBar.ActionButton>
+                        <Button x:Uid="RestartButton" Click="RestartButton_Click" />
+                    </InfoBar.ActionButton>
+                </InfoBar>
+
                 <!-- Settings only take effect while the resident process runs. -->
                 <InfoBar
                     x:Name="NotRunningInfoBar"

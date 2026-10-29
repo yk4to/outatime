@@ -9,3 +9,4 @@ build/_deps/json-src/include
 -isystem
 build/_deps/googletest-src/googletest/include
 -Isrc/Outatime
+-Ibuild/src/Outatime/generated

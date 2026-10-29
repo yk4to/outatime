@@ -17,6 +17,7 @@
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <!-- GitHub Actions sets CI=true: warnings fail CI without stopping local builds. -->
     <TreatWarningsAsErrors Condition="'$(CI)' == 'true'">true</TreatWarningsAsErrors>
+    <!-- Outatime.exe takes its version from here too (src/Outatime/CMakeLists.txt). -->
     <Version>0.1.0</Version>
     <DefaultLanguage>en-US</DefaultLanguage>
     <!-- Program.Main handles single-instance redirection before starting XAML. -->
