@@ -6,7 +6,8 @@
 
 LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 IDI_APP ICON "icons/outatime.ico"
-IDI_PAUSED ICON "icons/outatime-paused.ico"
+IDI_TRAY_ACTIVE ICON "icons/outatime-tray.ico"
+IDI_TRAY_PAUSED ICON "icons/outatime-tray-paused.ico"
 
 // Not LANG_NEUTRAL: LoadString takes a neutral string over the one for the UI language.
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
