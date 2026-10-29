@@ -30,10 +30,9 @@ Invoke-Native $cmake --preset default
 Invoke-Native $cmake --build --preset release
 Invoke-Native dotnet publish src/Outatime.Settings -c Release -o (Join-Path $stage 'settings')
 
-Copy-Item build/bin/Release/Outatime.exe, LICENSE $stage
+# The settings app's build writes THIRD-PARTY-NOTICES.txt next to Outatime.exe.
+Copy-Item build/bin/Release/Outatime.exe, build/bin/Release/THIRD-PARTY-NOTICES.txt, LICENSE $stage
 Get-ChildItem $stage -Recurse -Filter *.pdb | Remove-Item
-# The self-contained Windows App SDK runtime ships machine learning DLLs (~40 MB) that the settings app never loads.
-Get-ChildItem (Join-Path $stage 'settings') -Include onnxruntime.dll, DirectML.dll -Recurse | Remove-Item
 
 $zip = Join-Path $dist "Outatime-$Version-win-x64.zip"
 Compress-Archive -Path $stage -DestinationPath $zip

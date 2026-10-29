@@ -141,6 +141,12 @@
   <data name="RepositoryButton.Content" xml:space="preserve">
     <value>GitHub 仓库</value>
   </data>
+  <data name="ThirdPartyCard.Header" xml:space="preserve">
+    <value>第三方软件许可证</value>
+  </data>
+  <data name="OpenThirdPartyNoticesButton.Content" xml:space="preserve">
+    <value>打开</value>
+  </data>
   <data name="SaveErrorTitle" xml:space="preserve">
     <value>无法保存设置</value>
   </data>
@@ -152,6 +158,9 @@
   </data>
   <data name="OpenSettingsFileErrorTitle" xml:space="preserve">
     <value>无法打开设置文件</value>
+  </data>
+  <data name="OpenThirdPartyNoticesErrorTitle" xml:space="preserve">
+    <value>无法打开第三方软件许可证</value>
   </data>
   <data name="RestartErrorTitle" xml:space="preserve">
     <value>无法重新启动 Outatime</value>

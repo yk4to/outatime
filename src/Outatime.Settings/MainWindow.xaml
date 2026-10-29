@@ -173,6 +173,9 @@
                         <controls:SettingsCard x:Uid="LicenseCard">
                             <HyperlinkButton x:Uid="RepositoryButton" NavigateUri="https://github.com/yk4to/outatime" />
                         </controls:SettingsCard>
+                        <controls:SettingsCard x:Uid="ThirdPartyCard">
+                            <Button x:Uid="OpenThirdPartyNoticesButton" Click="OpenThirdPartyNoticesButton_Click" />
+                        </controls:SettingsCard>
                     </controls:SettingsExpander.Items>
                 </controls:SettingsExpander>
             </StackPanel>

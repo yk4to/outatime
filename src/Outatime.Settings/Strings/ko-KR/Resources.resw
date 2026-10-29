@@ -141,6 +141,12 @@
   <data name="RepositoryButton.Content" xml:space="preserve">
     <value>GitHub 저장소</value>
   </data>
+  <data name="ThirdPartyCard.Header" xml:space="preserve">
+    <value>타사 소프트웨어 라이선스</value>
+  </data>
+  <data name="OpenThirdPartyNoticesButton.Content" xml:space="preserve">
+    <value>열기</value>
+  </data>
   <data name="SaveErrorTitle" xml:space="preserve">
     <value>설정을 저장할 수 없습니다</value>
   </data>
@@ -152,6 +158,9 @@
   </data>
   <data name="OpenSettingsFileErrorTitle" xml:space="preserve">
     <value>설정 파일을 열 수 없습니다</value>
+  </data>
+  <data name="OpenThirdPartyNoticesErrorTitle" xml:space="preserve">
+    <value>타사 소프트웨어 라이선스를 열 수 없습니다</value>
   </data>
   <data name="RestartErrorTitle" xml:space="preserve">
     <value>Outatime을 다시 시작할 수 없습니다</value>
