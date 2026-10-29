@@ -148,6 +148,12 @@
   <data name="RepositoryButton.Content" xml:space="preserve">
     <value>GitHub repository</value>
   </data>
+  <data name="ThirdPartyCard.Header" xml:space="preserve">
+    <value>Third-party software licenses</value>
+  </data>
+  <data name="OpenThirdPartyNoticesButton.Content" xml:space="preserve">
+    <value>Open</value>
+  </data>
 
   <data name="SaveErrorTitle" xml:space="preserve">
     <value>Couldn't save settings</value>
@@ -160,6 +166,9 @@
   </data>
   <data name="OpenSettingsFileErrorTitle" xml:space="preserve">
     <value>Couldn't open the settings file</value>
+  </data>
+  <data name="OpenThirdPartyNoticesErrorTitle" xml:space="preserve">
+    <value>Couldn't open the third-party software licenses</value>
   </data>
   <data name="RestartErrorTitle" xml:space="preserve">
     <value>Couldn't restart Outatime</value>

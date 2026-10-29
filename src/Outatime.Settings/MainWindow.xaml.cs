@@ -259,6 +259,20 @@ public sealed partial class MainWindow : Window
         }
     }
 
+    // Next to Outatime.exe, one level above the settings app, as in the zip.
+    private async void OpenThirdPartyNoticesButton_Click(object sender, RoutedEventArgs e)
+    {
+        var path = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "THIRD-PARTY-NOTICES.txt"));
+        try
+        {
+            Process.Start(new ProcessStartInfo(path) { UseShellExecute = true })?.Dispose();
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorAsync("OpenThirdPartyNoticesErrorTitle", ex.Message);
+        }
+    }
+
     private void RevertStartupSelection()
     {
         _updatingSelection = true;

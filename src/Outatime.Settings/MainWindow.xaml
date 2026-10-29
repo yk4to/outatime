@@ -27,13 +27,18 @@
                     Margin="0,0,0,20"
                     Style="{StaticResource TitleTextBlockStyle}" />
 
-                <!-- Shown when the running resident was built from a different commit than this app. -->
+                <!--
+                    Shown when the running resident was built from a different commit than this app.
+                    A closed InfoBar still takes its margin and the panel's spacing, so each one is
+                    also collapsed while closed.
+                -->
                 <InfoBar
                     x:Name="BuildMismatchInfoBar"
                     x:Uid="BuildMismatchInfoBar"
                     Margin="0,0,0,8"
                     IsClosable="False"
-                    Severity="Warning">
+                    Severity="Warning"
+                    Visibility="{x:Bind BuildMismatchInfoBar.IsOpen, Mode=OneWay}">
                     <InfoBar.ActionButton>
                         <Button x:Uid="RestartButton" Click="RestartButton_Click" />
                     </InfoBar.ActionButton>
@@ -45,7 +50,8 @@
                     x:Uid="NotRunningInfoBar"
                     Margin="0,0,0,8"
                     IsClosable="False"
-                    Severity="Warning">
+                    Severity="Warning"
+                    Visibility="{x:Bind NotRunningInfoBar.IsOpen, Mode=OneWay}">
                     <InfoBar.ActionButton>
                         <Button x:Name="StartButton" x:Uid="StartButton" Click="StartButton_Click" />
                     </InfoBar.ActionButton>
@@ -142,7 +148,8 @@
                 <InfoBar
                     x:Name="RestartInfoBar"
                     IsClosable="False"
-                    Severity="Warning">
+                    Severity="Warning"
+                    Visibility="{x:Bind RestartInfoBar.IsOpen, Mode=OneWay}">
                     <InfoBar.ActionButton>
                         <Button x:Name="RestartButton" x:Uid="RestartButton" Click="RestartButton_Click" />
                     </InfoBar.ActionButton>
@@ -172,6 +179,9 @@
                     <controls:SettingsExpander.Items>
                         <controls:SettingsCard x:Uid="LicenseCard">
                             <HyperlinkButton x:Uid="RepositoryButton" NavigateUri="https://github.com/yk4to/outatime" />
+                        </controls:SettingsCard>
+                        <controls:SettingsCard x:Uid="ThirdPartyCard">
+                            <Button x:Uid="OpenThirdPartyNoticesButton" Click="OpenThirdPartyNoticesButton_Click" />
                         </controls:SettingsCard>
                     </controls:SettingsExpander.Items>
                 </controls:SettingsExpander>

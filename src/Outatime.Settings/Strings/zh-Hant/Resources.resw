@@ -141,6 +141,12 @@
   <data name="RepositoryButton.Content" xml:space="preserve">
     <value>GitHub 存放庫</value>
   </data>
+  <data name="ThirdPartyCard.Header" xml:space="preserve">
+    <value>協力廠商軟體授權</value>
+  </data>
+  <data name="OpenThirdPartyNoticesButton.Content" xml:space="preserve">
+    <value>開啟</value>
+  </data>
   <data name="SaveErrorTitle" xml:space="preserve">
     <value>無法儲存設定</value>
   </data>
@@ -152,6 +158,9 @@
   </data>
   <data name="OpenSettingsFileErrorTitle" xml:space="preserve">
     <value>無法開啟設定檔</value>
+  </data>
+  <data name="OpenThirdPartyNoticesErrorTitle" xml:space="preserve">
+    <value>無法開啟協力廠商軟體授權</value>
   </data>
   <data name="RestartErrorTitle" xml:space="preserve">
     <value>無法重新啟動 Outatime</value>

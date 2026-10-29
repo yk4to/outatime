@@ -141,6 +141,12 @@
   <data name="RepositoryButton.Content" xml:space="preserve">
     <value>GitHub リポジトリ</value>
   </data>
+  <data name="ThirdPartyCard.Header" xml:space="preserve">
+    <value>サードパーティ ソフトウェアのライセンス</value>
+  </data>
+  <data name="OpenThirdPartyNoticesButton.Content" xml:space="preserve">
+    <value>開く</value>
+  </data>
   <data name="SaveErrorTitle" xml:space="preserve">
     <value>設定を保存できませんでした</value>
   </data>
@@ -152,6 +158,9 @@
   </data>
   <data name="OpenSettingsFileErrorTitle" xml:space="preserve">
     <value>設定ファイルを開けませんでした</value>
+  </data>
+  <data name="OpenThirdPartyNoticesErrorTitle" xml:space="preserve">
+    <value>サードパーティ ソフトウェアのライセンスを開けませんでした</value>
   </data>
   <data name="RestartErrorTitle" xml:space="preserve">
     <value>Outatime を再起動できませんでした</value>
