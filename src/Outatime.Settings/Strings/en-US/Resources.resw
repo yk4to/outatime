@@ -21,10 +21,10 @@
   </data>
 
   <data name="NotRunningInfoBar.Title" xml:space="preserve">
-    <value>Outatime isn't running</value>
+    <value>Outatime isn't running in the background</value>
   </data>
   <data name="NotRunningInfoBar.Message" xml:space="preserve">
-    <value>Start it to switch the IME with the Alt keys.</value>
+    <value>The Alt keys don't switch the IME while it isn't running.</value>
   </data>
   <data name="StartButton.Content" xml:space="preserve">
     <value>Start</value>

@@ -20,10 +20,10 @@
     <value>設定</value>
   </data>
   <data name="NotRunningInfoBar.Title" xml:space="preserve">
-    <value>Outatime 未在執行</value>
+    <value>Outatime 未在背景執行</value>
   </data>
   <data name="NotRunningInfoBar.Message" xml:space="preserve">
-    <value>啟動後即可使用 Alt 鍵切換輸入法。</value>
+    <value>未執行時無法使用 Alt 鍵切換輸入法。</value>
   </data>
   <data name="StartButton.Content" xml:space="preserve">
     <value>啟動</value>
