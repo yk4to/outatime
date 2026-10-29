@@ -10,6 +10,9 @@ namespace {
 // does not treat the Alt release as a menu bar activation.
 constexpr WORD kMaskKey = 0xE8;
 
+// Tags the keys we send, so the hook can tell them from other programs' ("OUTA").
+constexpr ULONG_PTR kOurExtraInfo = 0x4F555441;
+
 // Asks the hook thread to remove the mouse hook once no Alt key is held.
 constexpr UINT WM_UPDATE_MOUSE_HOOK = WM_APP + 1;
 
@@ -49,12 +52,13 @@ void TraceKey(const KeyEvent& event, Decision decision) {
         return;
     }
     static constexpr const wchar_t* kDecisions[] = {L"pass", L"TAP", L"DOUBLE-TAP"};
+    static constexpr const wchar_t* kSources[] = {L"", L" (injected)", L" (ours)"};
     OUTATIME_TRACE(L"hook  %-10s %-4s%s time=%lu -> %s",
-                   alt              ? (event.vk == VK_LMENU ? L"LAlt" : L"RAlt")
-                   : event.injected ? L"injected"
-                                    : L"key",
-                   event.down ? L"down" : L"up", event.injected ? L" (injected)" : L"", event.time,
-                   kDecisions[static_cast<int>(decision)]);
+                   alt ? (event.vk == VK_LMENU ? L"LAlt" : L"RAlt")
+                   : event.source == KeySource::Physical ? L"key"
+                                                         : L"injected",
+                   event.down ? L"down" : L"up", kSources[static_cast<int>(event.source)],
+                   event.time, kDecisions[static_cast<int>(decision)]);
 }
 #endif
 
@@ -79,12 +83,14 @@ bool ReplayMaskedAltUp(DWORD vk) {
     INPUT inputs[3]{};
     inputs[0].type = INPUT_KEYBOARD;
     inputs[0].ki.wVk = kMaskKey;
+    inputs[0].ki.dwExtraInfo = kOurExtraInfo;
     inputs[1] = inputs[0];
     inputs[1].ki.dwFlags = KEYEVENTF_KEYUP;
     inputs[2].type = INPUT_KEYBOARD;
     inputs[2].ki.wVk = static_cast<WORD>(vk);
     inputs[2].ki.wScan = static_cast<WORD>(MapVirtualKeyW(vk, MAPVK_VK_TO_VSC));
     inputs[2].ki.dwFlags = KEYEVENTF_KEYUP | (vk == VK_RMENU ? KEYEVENTF_EXTENDEDKEY : 0);
+    inputs[2].ki.dwExtraInfo = kOurExtraInfo;
     const UINT sent = SendInput(ARRAYSIZE(inputs), inputs, sizeof(INPUT));
     if (sent == 1) {
         // Only the mask key-down got through; release it so it is not left held.
@@ -98,11 +104,14 @@ LRESULT CALLBACK KeyboardProc(int code, WPARAM wParam, LPARAM lParam) {
         return CallNextHookEx(nullptr, code, wParam, lParam);
     }
     const auto& kb = *reinterpret_cast<const KBDLLHOOKSTRUCT*>(lParam);
+    const KeySource source = (kb.flags & LLKHF_INJECTED) == 0  ? KeySource::Physical
+                             : kb.dwExtraInfo == kOurExtraInfo ? KeySource::Ours
+                                                               : KeySource::Injected;
     const KeyEvent event{
         .vk = kb.vkCode,
         .scanCode = kb.scanCode,
         .down = wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN,
-        .injected = (kb.flags & LLKHF_INJECTED) != 0,
+        .source = source,
         .time = kb.time,
     };
     const auto key = static_cast<WPARAM>(kb.vkCode == VK_LMENU ? AltKey::Left : AltKey::Right);
@@ -232,5 +241,7 @@ void StopAltTapHook() {
 void SetAltTapKeys(bool left, bool right) { g_detector.SetWatchedKeys(left, right); }
 
 void SetDoubleTapMs(DWORD ms) { g_detector.SetDoubleTapMs(ms); }
+
+void SetAcceptInjectedKeys(bool accept) { g_detector.SetAcceptInjected(accept); }
 
 }  // namespace outatime

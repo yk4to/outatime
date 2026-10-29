@@ -25,6 +25,10 @@ struct Settings {
     // tap and gives a plain Alt (e.g. for the menu bar).
     bool doubleTap = true;
     unsigned doubleTapMs = 200;
+    // Also watch Alt keys sent by other programs, such as remote desktop tools
+    // (e.g. Parsec). Off by default, since a script that sends a lone Alt (e.g.
+    // an AutoHotkey remap) would then switch the IME too.
+    bool acceptInjectedKeys = false;
 };
 
 // Parses the contents of settings.json. Returns nullopt if it is not a JSON

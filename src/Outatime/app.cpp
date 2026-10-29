@@ -302,6 +302,7 @@ void App::UpdateStatus() {
     const bool active = status == Status::Active;
     SetAltTapKeys(active, active && settings_.mode == Mode::LeftOffRightOn);
     SetDoubleTapMs(settings_.doubleTap ? settings_.doubleTapMs : 0);
+    SetAcceptInjectedKeys(settings_.acceptInjectedKeys);
     if (status != status_) {
         status_ = status;
         UpdateTrayIcon();

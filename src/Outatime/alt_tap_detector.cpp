@@ -24,6 +24,8 @@ void AltTapDetector::SetWatchedKeys(bool left, bool right) {
 
 void AltTapDetector::SetDoubleTapMs(std::uint32_t ms) { doubleTapMs_ = ms; }
 
+void AltTapDetector::SetAcceptInjected(bool accept) { acceptInjected_ = accept; }
+
 bool AltTapDetector::IsWatched(std::uint32_t vk) const {
     return (vk == kVkLeftAlt && leftWatched_) || (vk == kVkRightAlt && rightWatched_);
 }
@@ -59,8 +61,10 @@ bool AltTapDetector::AnyMouseButtonDown() const {
 }
 
 Decision AltTapDetector::OnKey(const KeyEvent& event) {
-    // Ignore injected keys (our own replays and other tools'), and the AltGr fake Ctrl.
-    if (event.injected || event.vk >= pressed_.size() ||
+    // Ignore our own replays, other programs' keys unless accepted, and the AltGr fake Ctrl.
+    const bool ignoredSource = event.source == KeySource::Ours ||
+                               (event.source == KeySource::Injected && !acceptInjected_);
+    if (ignoredSource || event.vk >= pressed_.size() ||
         (event.vk == kVkLeftCtrl && event.scanCode == kAltGrFakeCtrlScanCode)) {
         return Decision::PassThrough;
     }

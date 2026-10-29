@@ -13,6 +13,8 @@ internal static class SettingsStore
     public const string DefaultFullScreenPause = "games";
     public const string DoubleTapKey = "doubleTap";
     public const bool DefaultDoubleTap = true;
+    public const string AcceptInjectedKeysKey = "acceptInjectedKeys";
+    public const bool DefaultAcceptInjectedKeys = false;
 
     private static readonly string SettingsDirectory = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Outatime");

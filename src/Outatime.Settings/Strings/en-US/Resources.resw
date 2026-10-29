@@ -69,6 +69,13 @@
     <value>All full-screen apps</value>
   </data>
 
+  <data name="InjectedKeysCard.Header" xml:space="preserve">
+    <value>Respond to keys sent by other apps</value>
+  </data>
+  <data name="InjectedKeysCard.Description" xml:space="preserve">
+    <value>Lets the Alt keys switch the IME when you use this PC through a remote desktop app. Apps or scripts that send an Alt key on its own may also switch it.</value>
+  </data>
+
   <data name="StartupCard.Header" xml:space="preserve">
     <value>Start at sign-in</value>
   </data>

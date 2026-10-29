@@ -57,7 +57,10 @@
                     <controls:SettingsCard.HeaderIcon>
                         <FontIcon Glyph="&#xE7A7;" />
                     </controls:SettingsCard.HeaderIcon>
-                    <ToggleSwitch x:Name="DoubleTapToggle" Toggled="DoubleTapToggle_Toggled" />
+                    <ToggleSwitch
+                        x:Name="DoubleTapToggle"
+                        Tag="doubleTap"
+                        Toggled="SettingToggle_Toggled" />
                 </controls:SettingsCard>
 
                 <controls:SettingsCard x:Uid="FullScreenCard">
@@ -72,6 +75,16 @@
                         <ComboBoxItem x:Uid="FullScreenGames" Tag="games" />
                         <ComboBoxItem x:Uid="FullScreenAll" Tag="all" />
                     </ComboBox>
+                </controls:SettingsCard>
+
+                <controls:SettingsCard x:Uid="InjectedKeysCard">
+                    <controls:SettingsCard.HeaderIcon>
+                        <FontIcon Glyph="&#xE8AF;" />
+                    </controls:SettingsCard.HeaderIcon>
+                    <ToggleSwitch
+                        x:Name="InjectedKeysToggle"
+                        Tag="acceptInjectedKeys"
+                        Toggled="SettingToggle_Toggled" />
                 </controls:SettingsCard>
 
                 <controls:SettingsCard x:Uid="StartupCard">

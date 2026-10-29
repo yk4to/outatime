@@ -56,6 +56,9 @@ std::optional<Settings> ParseSettings(std::string_view text) {
         it != json.end() && it->is_number_integer() && *it >= 0 && *it <= 1000) {
         settings.doubleTapMs = it->get<unsigned>();
     }
+    if (const auto it = json.find("acceptInjectedKeys"); it != json.end() && it->is_boolean()) {
+        settings.acceptInjectedKeys = it->get<bool>();
+    }
     return settings;
 }
 

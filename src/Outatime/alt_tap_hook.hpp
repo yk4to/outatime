@@ -29,4 +29,8 @@ void SetAltTapKeys(bool left, bool right);
 // double tap. 0 turns double taps off.
 void SetDoubleTapMs(DWORD ms);
 
+// Whether keys sent by other programs (e.g. remote desktop tools) are watched
+// too. Our own replayed keys are always ignored.
+void SetAcceptInjectedKeys(bool accept);
+
 }  // namespace outatime
