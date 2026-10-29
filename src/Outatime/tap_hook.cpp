@@ -1,19 +1,20 @@
-#include "alt_tap_hook.hpp"
+#include "tap_hook.hpp"
 
-#include "alt_tap_detector.hpp"
+#include "tap_detector.hpp"
 #include "trace.hpp"
 
 namespace outatime {
 namespace {
 
-// Unassigned virtual key, injected between Alt down and up so the focused app
-// does not treat the Alt release as a menu bar activation.
+// Unassigned virtual key, injected between a tap key's down and up so the focused
+// app does not treat the Alt release as a menu bar activation, nor Windows the
+// Windows key release as a request for the Start menu.
 constexpr WORD kMaskKey = 0xE8;
 
 // Tags the keys we send, so the hook can tell them from other programs' ("OUTA").
 constexpr ULONG_PTR kOurExtraInfo = 0x4F555441;
 
-// Asks the hook thread to remove the mouse hook once no Alt key is held.
+// Asks the hook thread to remove the mouse hook once no tap key is held.
 constexpr UINT WM_UPDATE_MOUSE_HOOK = WM_APP + 1;
 
 class PhysicalInputState final : public InputState {
@@ -32,7 +33,7 @@ DWORD g_threadId = 0;
 
 const PhysicalInputState g_input;
 // Its setters are called from the main thread; everything else from the hook thread.
-AltTapDetector g_detector(g_input);
+TapDetector g_detector(g_input);
 
 // Touched only on the hook thread.
 HHOOK g_keyboardHook = nullptr;
@@ -41,20 +42,21 @@ HHOOK g_mouseHook = nullptr;
 LRESULT CALLBACK MouseProc(int code, WPARAM wParam, LPARAM lParam);
 
 #ifndef NDEBUG
-// Traces Alt events, and only that some other key moved shortly after one (never
-// which key), so the timing around a tap can be read from trace.log.
+// Traces tap key events, and only that some other key moved shortly after one
+// (never which key), so the timing around a tap can be read from trace.log.
 void TraceKey(const KeyEvent& event, Decision decision) {
-    static DWORD lastAltTime = 0;  // Hook thread only
-    const bool alt = event.vk == VK_LMENU || event.vk == VK_RMENU;
-    if (alt) {
-        lastAltTime = event.time;
-    } else if (event.time - lastAltTime > 1000) {
+    static DWORD lastTapKeyTime = 0;  // Hook thread only
+    const std::optional<TapKey> tapKey = TapKeyFromVirtualKey(event.vk);
+    if (tapKey) {
+        lastTapKeyTime = event.time;
+    } else if (event.time - lastTapKeyTime > 1000) {
         return;
     }
+    static constexpr const wchar_t* kTapKeys[] = {L"LAlt", L"RAlt", L"LWin", L"RWin"};
     static constexpr const wchar_t* kDecisions[] = {L"pass", L"TAP", L"DOUBLE-TAP"};
     static constexpr const wchar_t* kSources[] = {L"", L" (injected)", L" (ours)"};
     OUTATIME_TRACE(L"hook  %-10s %-4s%s time=%lu -> %s",
-                   alt ? (event.vk == VK_LMENU ? L"LAlt" : L"RAlt")
+                   tapKey                                ? kTapKeys[Index(*tapKey)]
                    : event.source == KeySource::Physical ? L"key"
                                                          : L"injected",
                    event.down ? L"down" : L"up", kSources[static_cast<int>(event.source)],
@@ -62,24 +64,26 @@ void TraceKey(const KeyEvent& event, Decision decision) {
 }
 #endif
 
-// The mouse hook is only needed while an Alt key is held, so it is installed on
-// demand. Call after giving the detector an event, with AltHeld() from before.
-void UpdateMouseHook(bool wasAltHeld) {
-    const bool altHeld = g_detector.AltHeld();
-    if (altHeld && !g_mouseHook) {
+// The mouse hook is only needed while a tap key is held, so it is installed on
+// demand. Call after giving the detector an event, with TapKeyHeld() from before.
+void UpdateMouseHook(bool wasHeld) {
+    const bool held = g_detector.TapKeyHeld();
+    if (held && !g_mouseHook) {
         // Install right here rather than via the message loop, so a click right after
-        // the Alt press is not missed.
+        // the key press is not missed.
         g_mouseHook = SetWindowsHookExW(WH_MOUSE_LL, MouseProc, GetModuleHandleW(nullptr), 0);
-    } else if (!altHeld && wasAltHeld) {
+    } else if (!held && wasHeld) {
         // Removal can wait; MouseProc calls this, and it should not unhook itself.
         PostThreadMessageW(g_threadId, WM_UPDATE_MOUSE_HOOK, 0, 0);
     }
 }
 
-// Sends the mask key and then the Alt key-up. Returns false if the Alt key-up was
-// not injected (e.g. blocked by UIPI); the caller must then let the real key-up
-// through, or Alt would stay down.
-bool ReplayMaskedAltUp(DWORD vk) {
+// Sends the mask key and then the tap key's key-up. Returns false if the key-up
+// was not injected (e.g. blocked by UIPI); the caller must then let the real
+// key-up through, or the key would stay down.
+bool ReplayMaskedKeyUp(DWORD vk) {
+    // Right Alt and both Windows keys are extended keys.
+    const bool extended = vk == VK_RMENU || vk == VK_LWIN || vk == VK_RWIN;
     INPUT inputs[3]{};
     inputs[0].type = INPUT_KEYBOARD;
     inputs[0].ki.wVk = kMaskKey;
@@ -89,7 +93,7 @@ bool ReplayMaskedAltUp(DWORD vk) {
     inputs[2].type = INPUT_KEYBOARD;
     inputs[2].ki.wVk = static_cast<WORD>(vk);
     inputs[2].ki.wScan = static_cast<WORD>(MapVirtualKeyW(vk, MAPVK_VK_TO_VSC));
-    inputs[2].ki.dwFlags = KEYEVENTF_KEYUP | (vk == VK_RMENU ? KEYEVENTF_EXTENDEDKEY : 0);
+    inputs[2].ki.dwFlags = KEYEVENTF_KEYUP | (extended ? KEYEVENTF_EXTENDEDKEY : 0);
     inputs[2].ki.dwExtraInfo = kOurExtraInfo;
     const UINT sent = SendInput(ARRAYSIZE(inputs), inputs, sizeof(INPUT));
     if (sent == 1) {
@@ -114,20 +118,21 @@ LRESULT CALLBACK KeyboardProc(int code, WPARAM wParam, LPARAM lParam) {
         .source = source,
         .time = kb.time,
     };
-    const auto key = static_cast<WPARAM>(kb.vkCode == VK_LMENU ? AltKey::Left : AltKey::Right);
 
-    const bool wasAltHeld = g_detector.AltHeld();
+    const bool wasHeld = g_detector.TapKeyHeld();
     const Decision decision = g_detector.OnKey(event);
-    UpdateMouseHook(wasAltHeld);
+    UpdateMouseHook(wasHeld);
 #ifndef NDEBUG
     TraceKey(event, decision);
 #endif
 
+    // Taps and double taps only come from watched keys, which are all tap keys.
+    const auto key = static_cast<WPARAM>(TapKeyFromVirtualKey(kb.vkCode).value_or(TapKey{}));
     switch (decision) {
     case Decision::Tap:
         // Swallow the real key-up and replay it after the mask key. If that fails,
-        // fall back to a plain Alt press.
-        if (ReplayMaskedAltUp(kb.vkCode)) {
+        // fall back to a plain key press.
+        if (ReplayMaskedKeyUp(kb.vkCode)) {
             OUTATIME_TRACE(L"hook  replayed masked key-up, posting tap");
             PostMessageW(g_target, g_tapMessage, key,
                          reinterpret_cast<LPARAM>(GetForegroundWindow()));
@@ -147,18 +152,18 @@ LRESULT CALLBACK KeyboardProc(int code, WPARAM wParam, LPARAM lParam) {
 
 LRESULT CALLBACK MouseProc(int code, WPARAM wParam, LPARAM lParam) {
     if (code == HC_ACTION && wParam != WM_MOUSEMOVE) {
-        const bool wasAltHeld = g_detector.AltHeld();
+        const bool wasHeld = g_detector.TapKeyHeld();
         g_detector.OnMouseInput();
-        if (wasAltHeld) {
-            OUTATIME_TRACE(L"hook  mouse input while Alt held -> combination");
+        if (wasHeld) {
+            OUTATIME_TRACE(L"hook  mouse input while tap key held -> combination");
         }
-        UpdateMouseHook(wasAltHeld);
+        UpdateMouseHook(wasHeld);
     }
     return CallNextHookEx(nullptr, code, wParam, lParam);
 }
 
 // Filled in by the hook thread before it signals `ready`. Lives on the stack of
-// StartAltTapHook, which waits for the signal, so it must not be touched afterwards.
+// StartTapHook, which waits for the signal, so it must not be touched afterwards.
 struct StartupResult {
     HANDLE ready;
     bool hooked;
@@ -180,8 +185,8 @@ DWORD WINAPI HookThread(LPVOID param) {
     }
 
     while (GetMessageW(&msg, nullptr, 0, 0) > 0) {
-        // A new Alt press may have arrived since the removal was requested.
-        if (msg.message == WM_UPDATE_MOUSE_HOOK && !g_detector.AltHeld() && g_mouseHook) {
+        // A new tap key press may have arrived since the removal was requested.
+        if (msg.message == WM_UPDATE_MOUSE_HOOK && !g_detector.TapKeyHeld() && g_mouseHook) {
             UnhookWindowsHookEx(g_mouseHook);
             g_mouseHook = nullptr;
         }
@@ -198,7 +203,7 @@ DWORD WINAPI HookThread(LPVOID param) {
 
 }  // namespace
 
-bool StartAltTapHook(HWND target, UINT tapMessage, UINT doubleTapMessage) {
+bool StartTapHook(HWND target, UINT tapMessage, UINT doubleTapMessage) {
     g_target = target;
     g_tapMessage = tapMessage;
     g_doubleTapMessage = doubleTapMessage;
@@ -228,7 +233,7 @@ bool StartAltTapHook(HWND target, UINT tapMessage, UINT doubleTapMessage) {
     return true;
 }
 
-void StopAltTapHook() {
+void StopTapHook() {
     if (!g_thread) {
         return;
     }
@@ -238,7 +243,7 @@ void StopAltTapHook() {
     g_thread = nullptr;
 }
 
-void SetAltTapKeys(bool left, bool right) { g_detector.SetWatchedKeys(left, right); }
+void SetTapKeys(TapKeySet keys) { g_detector.SetWatchedKeys(keys); }
 
 void SetDoubleTapMs(DWORD ms) { g_detector.SetDoubleTapMs(ms); }
 

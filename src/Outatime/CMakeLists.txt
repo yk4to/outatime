@@ -9,7 +9,7 @@ FetchContent_MakeAvailable(json)
 
 # Logic without Win32 dependencies, shared with the unit tests.
 add_library(outatime_core STATIC
-    alt_tap_detector.cpp
+    tap_detector.cpp
     settings.cpp
 )
 target_include_directories(outatime_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
@@ -24,7 +24,7 @@ add_executable(Outatime WIN32
     settings_watcher.cpp
     tray_icon.cpp
     win_util.cpp
-    alt_tap_hook.cpp
+    tap_hook.cpp
     trace.cpp
     ime.cpp
     diagnostics.cpp

@@ -22,8 +22,8 @@ namespace {
 
 constexpr UINT kTrayIconId = 1;
 constexpr UINT WM_TRAYICON = WM_APP + 1;
-constexpr UINT WM_ALT_TAP = WM_APP + 2;
-constexpr UINT WM_ALT_DOUBLE_TAP = WM_APP + 3;
+constexpr UINT WM_TAP = WM_APP + 2;
+constexpr UINT WM_DOUBLE_TAP = WM_APP + 3;
 
 enum MenuId : UINT {
     kMenuSettings = 1,
@@ -99,7 +99,7 @@ int App::Run() {
     ChangeWindowMessageFilterEx(hwnd_, taskbarCreatedMsg_, MSGFLT_ALLOW, nullptr);
 
     UpdateStatus();
-    if (!StartAltTapHook(hwnd_, WM_ALT_TAP, WM_ALT_DOUBLE_TAP)) {
+    if (!StartTapHook(hwnd_, WM_TAP, WM_DOUBLE_TAP)) {
         MessageBoxW(nullptr, LoadResourceString(IDS_HOOK_FAILED).c_str(), kAppName,
                     MB_OK | MB_ICONERROR);
         DestroyWindow(hwnd_);
@@ -141,7 +141,7 @@ int App::Run() {
     if (foregroundHook) {
         UnhookWinEvent(foregroundHook);
     }
-    StopAltTapHook();
+    StopTapHook();
     trace::Flush();
     return static_cast<int>(msg.wParam);
 }
@@ -180,15 +180,15 @@ LRESULT App::HandleMessage(UINT msg, WPARAM wParam, LPARAM lParam) {
         }
         return 0;
 
-    case WM_ALT_TAP:
+    case WM_TAP:
         OUTATIME_TRACE(L"main  tap received (posted %ld ms ago by tick count)",
                        static_cast<long>(GetTickCount() - GetMessageTime()));
-        OnAltTap(static_cast<AltKey>(wParam), reinterpret_cast<HWND>(lParam));
+        OnTap(static_cast<TapKey>(wParam), reinterpret_cast<HWND>(lParam));
         return 0;
 
-    case WM_ALT_DOUBLE_TAP:
+    case WM_DOUBLE_TAP:
         OUTATIME_TRACE(L"main  double tap received, restoring");
-        OnAltDoubleTap();
+        OnDoubleTap();
         return 0;
 
     case WM_TIMER:
@@ -282,8 +282,17 @@ void App::ShowTrayMenu(POINT point) {
     DestroyMenu(menu);
 }
 
+// The keys whose taps do something according to the settings.
+TapKeySet App::AssignedKeys() const {
+    TapKeySet keys;
+    for (std::size_t i = 0; i < kTapKeyCount; ++i) {
+        keys[i] = settings_.keys[i] != KeyAction::None;
+    }
+    return keys;
+}
+
 App::Status App::CurrentStatus() const {
-    if (settings_.mode == Mode::Disabled) {
+    if (AssignedKeys().none()) {
         return Status::Off;
     }
     if (pausedFromMenu_) {
@@ -295,12 +304,11 @@ App::Status App::CurrentStatus() const {
     return Status::Active;
 }
 
-// Re-evaluates whether Alt taps should switch the IME, and tells the hook and
-// the tray icon. A paused hook lets Alt through untouched, so games get it as is.
+// Re-evaluates whether taps should switch the IME, and tells the hook and the
+// tray icon. A paused hook lets the keys through untouched, so games get them as is.
 void App::UpdateStatus() {
     const Status status = CurrentStatus();
-    const bool active = status == Status::Active;
-    SetAltTapKeys(active, active && settings_.mode == Mode::LeftOffRightOn);
+    SetTapKeys(status == Status::Active ? AssignedKeys() : TapKeySet{});
     SetDoubleTapMs(settings_.doubleTap ? settings_.doubleTapMs : 0);
     SetAcceptInjectedKeys(settings_.acceptInjectedKeys);
     if (status != status_) {
@@ -339,19 +347,20 @@ void App::ReloadSettings() {
     }
 }
 
-// `foreground` is the window that was in front when the Alt key was released.
-void App::OnAltTap(AltKey key, HWND foreground) {
+// `foreground` is the window that was in front when the key was released.
+void App::OnTap(TapKey key, HWND foreground) {
     std::optional<ime::Action> action;
-    switch (settings_.mode) {
-    case Mode::Toggle:
-        if (key == AltKey::Left) {
-            action = ime::Action::Toggle;
-        }
+    switch (settings_.ActionFor(key)) {
+    case KeyAction::Toggle:
+        action = ime::Action::Toggle;
         break;
-    case Mode::LeftOffRightOn:
-        action = key == AltKey::Left ? ime::Action::Off : ime::Action::On;
+    case KeyAction::On:
+        action = ime::Action::On;
         break;
-    case Mode::Disabled:
+    case KeyAction::Off:
+        action = ime::Action::Off;
+        break;
+    case KeyAction::None:
         break;
     }
     if (!action) {
@@ -368,9 +377,9 @@ void App::OnAltTap(AltKey key, HWND foreground) {
     }
 }
 
-// The user pressed the same Alt key again right after a tap to get a plain Alt,
+// The user pressed the same key again right after a tap to get a plain key press,
 // so put the IME back the way it was before the tap.
-void App::OnAltDoubleTap() {
+void App::OnDoubleTap() {
     if (lastTap_.previousOpen) {
         ime::SetOpen(lastTap_.window, *lastTap_.previousOpen);
     }

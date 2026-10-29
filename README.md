@@ -1,6 +1,6 @@
 # Outatime
 
-A lightweight Windows utility that switches the IME with the Alt keys.
+A lightweight Windows utility that switches the IME with the Alt or Windows keys.
 
 ## Building
 

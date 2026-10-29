@@ -23,39 +23,54 @@
     <value>Outatime이 백그라운드에서 실행되고 있지 않습니다</value>
   </data>
   <data name="NotRunningInfoBar.Message" xml:space="preserve">
-    <value>실행 중이 아닐 때는 Alt 키로 IME를 전환할 수 없습니다.</value>
+    <value>실행 중이 아닐 때는 키로 IME를 전환할 수 없습니다.</value>
   </data>
   <data name="StartButton.Content" xml:space="preserve">
     <value>시작</value>
   </data>
-  <data name="ModeCard.Header" xml:space="preserve">
-    <value>Alt 키 동작</value>
+  <data name="KeysExpander.Header" xml:space="preserve">
+    <value>키 할당</value>
   </data>
-  <data name="ModeCard.Description" xml:space="preserve">
-    <value>Alt 키만 단독으로 눌렀을 때의 동작</value>
+  <data name="KeysExpander.Description" xml:space="preserve">
+    <value>키만 단독으로 눌렀을 때의 동작</value>
   </data>
-  <data name="ModeToggle.Content" xml:space="preserve">
-    <value>왼쪽 Alt 키로 IME 전환</value>
+  <data name="LeftAltCard.Header" xml:space="preserve">
+    <value>왼쪽 Alt</value>
   </data>
-  <data name="ModeLeftOffRightOn.Content" xml:space="preserve">
-    <value>왼쪽 Alt 키로 IME 끄기, 오른쪽 Alt 키로 켜기</value>
+  <data name="RightAltCard.Header" xml:space="preserve">
+    <value>오른쪽 Alt</value>
   </data>
-  <data name="ModeDisabled.Content" xml:space="preserve">
+  <data name="LeftWinCard.Header" xml:space="preserve">
+    <value>왼쪽 Windows 키</value>
+  </data>
+  <data name="RightWinCard.Header" xml:space="preserve">
+    <value>오른쪽 Windows 키</value>
+  </data>
+  <data name="KeyActionToggle.Content" xml:space="preserve">
+    <value>IME 전환</value>
+  </data>
+  <data name="KeyActionOn.Content" xml:space="preserve">
+    <value>IME 켜기</value>
+  </data>
+  <data name="KeyActionOff.Content" xml:space="preserve">
+    <value>IME 끄기</value>
+  </data>
+  <data name="KeyActionNone.Content" xml:space="preserve">
     <value>아무 작업도 하지 않음</value>
   </data>
 
   <data name="DoubleTapCard.Header" xml:space="preserve">
-    <value>Alt 두 번 눌러 일반 Alt 사용</value>
+    <value>두 번 눌러 일반 키로 사용</value>
   </data>
   <data name="DoubleTapCard.Description" xml:space="preserve">
-    <value>같은 Alt 키를 빠르게 두 번 누르면 IME 전환을 취소하고, 메뉴 모음을 열 때처럼 Alt를 평소대로 사용할 수 있습니다.</value>
+    <value>같은 키를 빠르게 두 번 누르면 IME 전환을 취소하고, 메뉴 모음이나 시작 메뉴를 열 때처럼 키를 평소대로 사용할 수 있습니다.</value>
   </data>
 
   <data name="FullScreenCard.Header" xml:space="preserve">
     <value>전체 화면 앱에서 일시 중지</value>
   </data>
   <data name="FullScreenCard.Description" xml:space="preserve">
-    <value>게임에서 Alt 키를 평소처럼 사용할 수 있게 합니다. '모든 전체 화면 앱'은 Windows가 전체 화면으로 판단한 다른 앱도 포함합니다.</value>
+    <value>게임에서 Alt 키와 Windows 키를 평소처럼 사용할 수 있게 합니다. '모든 전체 화면 앱'은 Windows가 전체 화면으로 판단한 다른 앱도 포함합니다.</value>
   </data>
   <data name="FullScreenOff.Content" xml:space="preserve">
     <value>끄기</value>
@@ -70,7 +85,7 @@
     <value>다른 앱에서 보낸 키 입력에도 반응</value>
   </data>
   <data name="InjectedKeysCard.Description" xml:space="preserve">
-    <value>원격 제어 앱으로 이 PC를 조작할 때도 Alt 키로 IME를 전환할 수 있습니다. Alt 키만 보내는 앱이나 스크립트로도 전환될 수 있습니다.</value>
+    <value>원격 제어 앱으로 이 PC를 조작할 때도 키로 IME를 전환할 수 있습니다. Alt 키나 Windows 키만 보내는 앱이나 스크립트로도 전환될 수 있습니다.</value>
   </data>
   <data name="StartupCard.Header" xml:space="preserve">
     <value>로그인할 때 시작</value>

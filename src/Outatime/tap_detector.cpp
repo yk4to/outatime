@@ -1,4 +1,4 @@
-#include "alt_tap_detector.hpp"
+#include "tap_detector.hpp"
 
 namespace outatime {
 namespace {
@@ -17,22 +17,20 @@ constexpr std::uint32_t kModifiers[] = {0x10, 0x11, 0x12, 0xA0, 0xA1, 0xA2,
 
 }  // namespace
 
-void AltTapDetector::SetWatchedKeys(bool left, bool right) {
-    leftWatched_ = left;
-    rightWatched_ = right;
-}
+void TapDetector::SetWatchedKeys(TapKeySet keys) { watched_ = keys.to_ulong(); }
 
-void AltTapDetector::SetDoubleTapMs(std::uint32_t ms) { doubleTapMs_ = ms; }
+void TapDetector::SetDoubleTapMs(std::uint32_t ms) { doubleTapMs_ = ms; }
 
-void AltTapDetector::SetAcceptInjected(bool accept) { acceptInjected_ = accept; }
+void TapDetector::SetAcceptInjected(bool accept) { acceptInjected_ = accept; }
 
-bool AltTapDetector::IsWatched(std::uint32_t vk) const {
-    return (vk == kVkLeftAlt && leftWatched_) || (vk == kVkRightAlt && rightWatched_);
+bool TapDetector::IsWatched(std::uint32_t vk) const {
+    const std::optional<TapKey> key = TapKeyFromVirtualKey(vk);
+    return key && TapKeySet(watched_).test(Index(*key));
 }
 
 // Key-ups can be missed (e.g. released on the secure desktop), so drop keys
 // that are no longer physically held before looking at what is pressed.
-void AltTapDetector::DropReleasedKeys() {
+void TapDetector::DropReleasedKeys() {
     for (std::uint32_t vk = 0; vk < pressed_.size(); ++vk) {
         if (pressed_[vk] && !input_.IsDown(vk)) {
             pressed_[vk] = false;
@@ -40,7 +38,7 @@ void AltTapDetector::DropReleasedKeys() {
     }
 }
 
-bool AltTapDetector::AnyModifierPressed() const {
+bool TapDetector::AnyModifierPressed() const {
     for (const std::uint32_t vk : kModifiers) {
         if (pressed_[vk]) {
             return true;
@@ -51,7 +49,7 @@ bool AltTapDetector::AnyModifierPressed() const {
 
 // Catches buttons held across the Alt press (e.g. Alt+drag started before Alt),
 // which mouse input events never report going down.
-bool AltTapDetector::AnyMouseButtonDown() const {
+bool TapDetector::AnyMouseButtonDown() const {
     for (const std::uint32_t vk : kMouseButtons) {
         if (input_.IsDown(vk)) {
             return true;
@@ -60,7 +58,7 @@ bool AltTapDetector::AnyMouseButtonDown() const {
     return false;
 }
 
-Decision AltTapDetector::OnKey(const KeyEvent& event) {
+Decision TapDetector::OnKey(const KeyEvent& event) {
     // Ignore our own replays, other programs' keys unless accepted, and the AltGr fake Ctrl.
     const bool ignoredSource = event.source == KeySource::Ours ||
                                (event.source == KeySource::Injected && !acceptInjected_);
@@ -74,13 +72,14 @@ Decision AltTapDetector::OnKey(const KeyEvent& event) {
         const bool repeat = pressed_[vk];
         Decision decision = Decision::PassThrough;
         if (repeat) {
-            // A key held from before Alt that starts repeating types Alt+key.
+            // A key held from before the tap key that starts repeating types e.g. Alt+key.
             if (vk != candidate_) {
                 candidate_ = 0;
             }
         } else {
-            // Pressing the same Alt key again right after a tap means the user wants a
-            // plain Alt (e.g. to open the menu bar). Any other key in between cancels this.
+            // Pressing the same key again right after a tap means the user wants a plain
+            // key press (e.g. to open the menu bar or the Start menu). Any other key in
+            // between cancels this.
             const std::uint32_t doubleTapMs = doubleTapMs_;
             const bool doubleTap = vk == lastTapVk_ && IsWatched(vk) && doubleTapMs != 0 &&
                                    event.time - lastTapTime_ <= doubleTapMs;
@@ -89,14 +88,14 @@ Decision AltTapDetector::OnKey(const KeyEvent& event) {
                 candidate_ = 0;
                 decision = Decision::DoubleTap;
             } else if (IsWatched(vk)) {
-                // When typing fast, the previous key is often still held as Alt goes
-                // down. That is fine as long as it is let go before Alt (checked on
+                // When typing fast, the previous key is often still held as the tap key
+                // goes down. That is fine as long as it is let go first (checked on
                 // key-up), but a held modifier means a shortcut such as Shift+Alt.
                 DropReleasedKeys();
                 candidate_ = !AnyModifierPressed() && !AnyMouseButtonDown() ? vk : 0;
                 candidateTime_ = event.time;
             } else {
-                // Any other key going down makes the held Alt key a combination. A key
+                // Any other key going down makes the held tap key a combination. A key
                 // being let go does not, as with Karabiner-Elements' to_if_alone.
                 candidate_ = 0;
             }
@@ -119,8 +118,8 @@ Decision AltTapDetector::OnKey(const KeyEvent& event) {
     return Decision::PassThrough;
 }
 
-void AltTapDetector::OnMouseInput() { candidate_ = 0; }
+void TapDetector::OnMouseInput() { candidate_ = 0; }
 
-void AltTapDetector::OnTapNotReplayed() { lastTapVk_ = 0; }
+void TapDetector::OnTapNotReplayed() { lastTapVk_ = 0; }
 
 }  // namespace outatime

@@ -6,15 +6,21 @@
 namespace outatime {
 namespace {
 
-std::optional<Mode> ParseMode(const std::string& value) {
+// Names in settings.json, indexed by TapKey.
+constexpr const char* kKeyNames[kTapKeyCount] = {"leftAlt", "rightAlt", "leftWin", "rightWin"};
+
+std::optional<KeyAction> ParseKeyAction(const std::string& value) {
+    if (value == "none") {
+        return KeyAction::None;
+    }
     if (value == "toggle") {
-        return Mode::Toggle;
+        return KeyAction::Toggle;
     }
-    if (value == "leftOffRightOn") {
-        return Mode::LeftOffRightOn;
+    if (value == "on") {
+        return KeyAction::On;
     }
-    if (value == "disabled") {
-        return Mode::Disabled;
+    if (value == "off") {
+        return KeyAction::Off;
     }
     return std::nullopt;
 }
@@ -41,8 +47,14 @@ std::optional<Settings> ParseSettings(std::string_view text) {
     }
 
     Settings settings;
-    if (const auto it = json.find("mode"); it != json.end() && it->is_string()) {
-        settings.mode = ParseMode(it->get<std::string>()).value_or(settings.mode);
+    if (const auto keys = json.find("keys"); keys != json.end() && keys->is_object()) {
+        // Keys that are missing or have an unknown action keep their defaults.
+        for (std::size_t i = 0; i < kTapKeyCount; ++i) {
+            if (const auto it = keys->find(kKeyNames[i]); it != keys->end() && it->is_string()) {
+                settings.keys[i] =
+                    ParseKeyAction(it->get<std::string>()).value_or(settings.keys[i]);
+            }
+        }
     }
     if (const auto it = json.find("pauseInFullScreen"); it != json.end() && it->is_string()) {
         settings.pauseInFullScreen =
@@ -51,7 +63,7 @@ std::optional<Settings> ParseSettings(std::string_view text) {
     if (const auto it = json.find("doubleTap"); it != json.end() && it->is_boolean()) {
         settings.doubleTap = it->get<bool>();
     }
-    // Values past a second would turn deliberate repeated taps into plain Alt presses.
+    // Values past a second would turn deliberate repeated taps into plain key presses.
     if (const auto it = json.find("doubleTapMs");
         it != json.end() && it->is_number_integer() && *it >= 0 && *it <= 1000) {
         settings.doubleTapMs = it->get<unsigned>();

@@ -1,17 +1,22 @@
 #pragma once
 
+#include <array>
 #include <optional>
 #include <string_view>
 
+#include "tap_key.hpp"
+
 namespace outatime {
 
-enum class Mode {
-    Toggle,          // Left Alt toggles the IME
-    LeftOffRightOn,  // Left Alt turns it off, Right Alt turns it on
-    Disabled,
+// What tapping a key on its own does.
+enum class KeyAction {
+    None,
+    Toggle,  // Turns the IME on if it is off, and off if it is on
+    On,
+    Off,
 };
 
-// When to step aside so full-screen apps (mostly games) get the Alt key as is.
+// When to step aside so full-screen apps (mostly games) get the keys as is.
 enum class FullScreenPause {
     Off,
     Games,  // Exclusive full-screen Direct3D apps (QUNS_RUNNING_D3D_FULL_SCREEN)
@@ -19,16 +24,20 @@ enum class FullScreenPause {
 };
 
 struct Settings {
-    Mode mode = Mode::Toggle;
+    // Indexed by TapKey. By default only Left Alt does something: it toggles.
+    std::array<KeyAction, kTapKeyCount> keys = {KeyAction::Toggle, KeyAction::None, KeyAction::None,
+                                                KeyAction::None};
     FullScreenPause pauseInFullScreen = FullScreenPause::Games;
-    // Pressing the same Alt key again within doubleTapMs after a tap undoes the
-    // tap and gives a plain Alt (e.g. for the menu bar).
+    // Pressing the same key again within doubleTapMs after a tap undoes the tap
+    // and gives a plain key press (e.g. for the menu bar or the Start menu).
     bool doubleTap = true;
     unsigned doubleTapMs = 200;
-    // Also watch Alt keys sent by other programs, such as remote desktop tools
+    // Also watch keys sent by other programs, such as remote desktop tools
     // (e.g. Parsec). Off by default, since a script that sends a lone Alt (e.g.
     // an AutoHotkey remap) would then switch the IME too.
     bool acceptInjectedKeys = false;
+
+    KeyAction ActionFor(TapKey key) const { return keys[Index(key)]; }
 };
 
 // Parses the contents of settings.json. Returns nullopt if it is not a JSON
