@@ -76,6 +76,8 @@ public sealed partial class MainWindow : Window
             SettingsStore.DefaultFullScreenPause);
         _updatingSelection = true;
         DoubleTapToggle.IsOn = SettingsStore.Get(SettingsStore.DoubleTapKey, SettingsStore.DefaultDoubleTap);
+        InjectedKeysToggle.IsOn = SettingsStore.Get(SettingsStore.AcceptInjectedKeysKey,
+            SettingsStore.DefaultAcceptInjectedKeys);
         _updatingSelection = false;
     }
 
@@ -127,13 +129,14 @@ public sealed partial class MainWindow : Window
         await SaveAsync(() => SettingsStore.Set(key, value));
     }
 
-    private async void DoubleTapToggle_Toggled(object sender, RoutedEventArgs e)
+    // For toggle switches backed by settings.json: the switch's Tag is the key.
+    private async void SettingToggle_Toggled(object sender, RoutedEventArgs e)
     {
-        if (_updatingSelection)
+        if (_updatingSelection || sender is not ToggleSwitch { Tag: string key, IsOn: var isOn })
         {
             return;
         }
-        await SaveAsync(() => SettingsStore.Set(SettingsStore.DoubleTapKey, DoubleTapToggle.IsOn));
+        await SaveAsync(() => SettingsStore.Set(key, isOn));
     }
 
     private async Task SaveAsync(Action save)

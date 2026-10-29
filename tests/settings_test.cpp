@@ -21,6 +21,7 @@ TEST(SettingsTest, EmptyObjectGivesDefaults) {
     EXPECT_EQ(settings.pauseInFullScreen, FullScreenPause::Games);
     EXPECT_TRUE(settings.doubleTap);
     EXPECT_EQ(settings.doubleTapMs, 200u);
+    EXPECT_FALSE(settings.acceptInjectedKeys);
 }
 
 TEST(SettingsTest, ReadsEveryKey) {
@@ -28,12 +29,14 @@ TEST(SettingsTest, ReadsEveryKey) {
         "mode": "leftOffRightOn",
         "pauseInFullScreen": "all",
         "doubleTap": false,
-        "doubleTapMs": 350
+        "doubleTapMs": 350,
+        "acceptInjectedKeys": true
     })");
     EXPECT_EQ(settings.mode, Mode::LeftOffRightOn);
     EXPECT_EQ(settings.pauseInFullScreen, FullScreenPause::All);
     EXPECT_FALSE(settings.doubleTap);
     EXPECT_EQ(settings.doubleTapMs, 350u);
+    EXPECT_TRUE(settings.acceptInjectedKeys);
 }
 
 TEST(SettingsTest, ReadsEveryMode) {
@@ -59,12 +62,14 @@ TEST(SettingsTest, WrongTypesFallBackToDefaults) {
         "mode": 1,
         "pauseInFullScreen": true,
         "doubleTap": "yes",
-        "doubleTapMs": "300"
+        "doubleTapMs": "300",
+        "acceptInjectedKeys": 1
     })");
     EXPECT_EQ(settings.mode, Mode::Toggle);
     EXPECT_EQ(settings.pauseInFullScreen, FullScreenPause::Games);
     EXPECT_TRUE(settings.doubleTap);
     EXPECT_EQ(settings.doubleTapMs, 200u);
+    EXPECT_FALSE(settings.acceptInjectedKeys);
 }
 
 TEST(SettingsTest, DoubleTapMsMustBeAnIntegerFromZeroToASecond) {

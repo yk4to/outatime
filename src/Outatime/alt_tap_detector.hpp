@@ -10,11 +10,17 @@ namespace outatime {
 inline constexpr std::uint32_t kVkLeftAlt = 0xA4;   // VK_LMENU
 inline constexpr std::uint32_t kVkRightAlt = 0xA5;  // VK_RMENU
 
+enum class KeySource {
+    Physical,  // Typed on a keyboard
+    Injected,  // Sent by another program, e.g. a remote desktop tool or AutoHotkey
+    Ours,      // Our own replayed keys
+};
+
 struct KeyEvent {
     std::uint32_t vk;
     std::uint32_t scanCode;
     bool down;
-    bool injected;       // Sent by a program, including our own replayed keys
+    KeySource source;
     std::uint32_t time;  // Milliseconds; wraps around
 };
 
@@ -54,6 +60,9 @@ public:
     // Time from a tap's key-up to the next key-down of the same key that counts
     // as a double tap. 0 turns double taps off.
     void SetDoubleTapMs(std::uint32_t ms);
+    // Whether keys sent by other programs count like typed ones. Remote desktop
+    // tools such as Parsec send all their keys this way.
+    void SetAcceptInjected(bool accept);
 
     Decision OnKey(const KeyEvent& event);
     // A click or wheel turns the held Alt key into a combination (e.g. Alt+click).
@@ -75,6 +84,7 @@ private:
     std::atomic<bool> leftWatched_ = false;
     std::atomic<bool> rightWatched_ = false;
     std::atomic<std::uint32_t> doubleTapMs_ = 0;
+    std::atomic<bool> acceptInjected_ = false;
 
     std::bitset<256> pressed_;
     std::uint32_t candidate_ = 0;      // VK of the Alt key that may become a tap, or 0

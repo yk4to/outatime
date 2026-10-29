@@ -66,6 +66,12 @@
   <data name="FullScreenAll.Content" xml:space="preserve">
     <value>すべての全画面アプリ</value>
   </data>
+  <data name="InjectedKeysCard.Header" xml:space="preserve">
+    <value>ほかのアプリから送信されたキー入力にも反応する</value>
+  </data>
+  <data name="InjectedKeysCard.Description" xml:space="preserve">
+    <value>リモート操作アプリからこの PC を操作するときも、Alt キーで IME を切り替えられます。Alt キーだけを送るアプリやスクリプトでも切り替わることがあります。</value>
+  </data>
   <data name="StartupCard.Header" xml:space="preserve">
     <value>サインイン時に起動</value>
   </data>

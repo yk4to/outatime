@@ -66,6 +66,12 @@
   <data name="FullScreenAll.Content" xml:space="preserve">
     <value>所有全屏应用</value>
   </data>
+  <data name="InjectedKeysCard.Header" xml:space="preserve">
+    <value>响应其他应用发送的按键输入</value>
+  </data>
+  <data name="InjectedKeysCard.Description" xml:space="preserve">
+    <value>通过远程控制应用操作这台电脑时，也能用 Alt 键切换输入法。单独发送 Alt 键的应用或脚本也可能触发切换。</value>
+  </data>
   <data name="StartupCard.Header" xml:space="preserve">
     <value>登录时启动</value>
   </data>

@@ -33,16 +33,18 @@ protected:
         detector.SetDoubleTapMs(200);
     }
 
-    Decision Down(std::uint32_t vk, std::uint32_t time = 0) {
+    // Injected keys update the physical state too, as SendInput does.
+    Decision Down(std::uint32_t vk, std::uint32_t time = 0,
+                  KeySource source = KeySource::Physical) {
         input.down.insert(vk);
         return detector.OnKey(
-            {.vk = vk, .scanCode = 0, .down = true, .injected = false, .time = time});
+            {.vk = vk, .scanCode = 0, .down = true, .source = source, .time = time});
     }
 
-    Decision Up(std::uint32_t vk, std::uint32_t time = 0) {
+    Decision Up(std::uint32_t vk, std::uint32_t time = 0, KeySource source = KeySource::Physical) {
         input.down.erase(vk);
         return detector.OnKey(
-            {.vk = vk, .scanCode = 0, .down = false, .injected = false, .time = time});
+            {.vk = vk, .scanCode = 0, .down = false, .source = source, .time = time});
     }
 
     Decision Tap(std::uint32_t vk, std::uint32_t downTime, std::uint32_t upTime) {
@@ -188,31 +190,58 @@ TEST_F(AltTapDetectorTest, MouseButtonHeldAtReleaseIsCombination) {
     EXPECT_EQ(Up(kVkLeftAlt), Decision::PassThrough);
 }
 
-TEST_F(AltTapDetectorTest, InjectedKeysAreIgnored) {
-    // Our own mask key (and other tools' input) must not turn a tap into a combination.
+TEST_F(AltTapDetectorTest, OwnKeysAreIgnored) {
+    // Our own mask key must not turn a tap into a combination, whatever the setting.
+    for (const bool accept : {false, true}) {
+        detector.SetAcceptInjected(accept);
+        // Far enough apart that the second round is not a double tap.
+        const std::uint32_t t = accept ? 10000 : 0;
+        Down(kVkLeftAlt, t);
+        EXPECT_EQ(Down(kVkMask, t, KeySource::Ours), Decision::PassThrough);
+        EXPECT_EQ(Up(kVkMask, t, KeySource::Ours), Decision::PassThrough);
+        EXPECT_EQ(Up(kVkLeftAlt, t), Decision::Tap) << "accept=" << accept;
+        // Nor does our own replayed Alt key-up count.
+        EXPECT_EQ(Up(kVkLeftAlt, t, KeySource::Ours), Decision::PassThrough);
+    }
+}
+
+TEST_F(AltTapDetectorTest, InjectedKeysAreIgnoredByDefault) {
+    // Other programs' keys must not turn a tap into a combination.
     Down(kVkLeftAlt);
-    EXPECT_EQ(
-        detector.OnKey({.vk = kVkMask, .scanCode = 0, .down = true, .injected = true, .time = 0}),
-        Decision::PassThrough);
+    EXPECT_EQ(Down(kVkA, 0, KeySource::Injected), Decision::PassThrough);
+    EXPECT_EQ(Up(kVkA, 0, KeySource::Injected), Decision::PassThrough);
     EXPECT_EQ(Up(kVkLeftAlt), Decision::Tap);
 
     // Nor does an injected Alt count as a tap.
-    EXPECT_EQ(detector.OnKey(
-                  {.vk = kVkLeftAlt, .scanCode = 0, .down = true, .injected = true, .time = 0}),
-              Decision::PassThrough);
+    EXPECT_EQ(Down(kVkLeftAlt, 0, KeySource::Injected), Decision::PassThrough);
     EXPECT_FALSE(detector.AltHeld());
+    EXPECT_EQ(Up(kVkLeftAlt, 0, KeySource::Injected), Decision::PassThrough);
+}
+
+TEST_F(AltTapDetectorTest, InjectedKeysCountWhenAccepted) {
+    // E.g. Parsec, which sends everything typed on the remote keyboard this way.
+    detector.SetAcceptInjected(true);
+    EXPECT_EQ(Down(kVkLeftAlt, 0, KeySource::Injected), Decision::PassThrough);
+    EXPECT_TRUE(detector.AltHeld());
+    EXPECT_EQ(Up(kVkLeftAlt, 50, KeySource::Injected), Decision::Tap);
+
+    // And their other keys make a combination.
+    Down(kVkLeftAlt, 1000, KeySource::Injected);
+    Down(kVkTab, 1050, KeySource::Injected);
+    Up(kVkTab, 1100, KeySource::Injected);
+    EXPECT_EQ(Up(kVkLeftAlt, 1150, KeySource::Injected), Decision::PassThrough);
 }
 
 TEST_F(AltTapDetectorTest, AltGrFakeCtrlIsIgnored) {
     const KeyEvent fakeCtrlDown{.vk = kVkLeftCtrl,
                                 .scanCode = kAltGrFakeCtrlScanCode,
                                 .down = true,
-                                .injected = false,
+                                .source = KeySource::Physical,
                                 .time = 0};
     const KeyEvent fakeCtrlUp{.vk = kVkLeftCtrl,
                               .scanCode = kAltGrFakeCtrlScanCode,
                               .down = false,
-                              .injected = false,
+                              .source = KeySource::Physical,
                               .time = 0};
     detector.OnKey(fakeCtrlDown);
     Down(kVkRightAlt);
