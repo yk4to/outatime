@@ -12,6 +12,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ApplicationIcon>..\Outatime\icons\outatime.ico</ApplicationIcon>
     <AnalysisLevel>latest-recommended</AnalysisLevel>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <!-- GitHub Actions sets CI=true: warnings fail CI without stopping local builds. -->
@@ -32,6 +33,11 @@
     <!-- Same layout as the zip: Outatime.exe + settings\Outatime.Settings.exe -->
     <OutDir>$(MSBuildThisFileDirectory)..\..\build\bin\$(Configuration)\settings\</OutDir>
   </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Shown in the About section. -->
+    <Content Include="..\Outatime\icons\outatime.png" Link="Assets\outatime.png" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.2.251219" />

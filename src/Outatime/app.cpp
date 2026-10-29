@@ -62,8 +62,8 @@ App::App(HINSTANCE instance) : instance_(instance) {
     taskbarCreatedMsg_ = RegisterWindowMessageW(L"TaskbarCreated");
     settings_ = LoadSettings().value_or(Settings{});
     status_ = CurrentStatus();
-    LoadIconMetric(instance, MAKEINTRESOURCEW(IDI_APP), LIM_SMALL, &activeIcon_);
-    LoadIconMetric(instance, MAKEINTRESOURCEW(IDI_PAUSED), LIM_SMALL, &pausedIcon_);
+    LoadIconMetric(instance, MAKEINTRESOURCEW(IDI_TRAY_ACTIVE), LIM_SMALL, &activeIcon_);
+    LoadIconMetric(instance, MAKEINTRESOURCEW(IDI_TRAY_PAUSED), LIM_SMALL, &pausedIcon_);
 }
 
 App::~App() {

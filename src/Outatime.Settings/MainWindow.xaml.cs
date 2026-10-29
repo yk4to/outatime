@@ -99,7 +99,7 @@ public sealed partial class MainWindow : Window
     {
         var assembly = Assembly.GetExecutingAssembly();
         var version = assembly.GetName().Version!.ToString(3);
-        AboutCard.Description = string.Format(CultureInfo.CurrentCulture, _resources.GetString("AboutVersion"), version);
+        AboutExpander.Description = string.Format(CultureInfo.CurrentCulture, _resources.GetString("AboutVersion"), version);
 
         // The .NET SDK appends the git commit to the informational version: "0.1.0+<sha>".
         var informational = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
