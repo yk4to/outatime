@@ -39,19 +39,46 @@
                     </InfoBar.ActionButton>
                 </InfoBar>
 
-                <controls:SettingsCard x:Uid="ModeCard">
-                    <controls:SettingsCard.HeaderIcon>
+                <!-- Each combo box's Tag is the key's name under "keys" in settings.json. -->
+                <controls:SettingsExpander x:Uid="KeysExpander" IsExpanded="True">
+                    <controls:SettingsExpander.HeaderIcon>
                         <FontIcon Glyph="&#xE765;" />
-                    </controls:SettingsCard.HeaderIcon>
-                    <ComboBox
-                        x:Name="ModeComboBox"
-                        SelectionChanged="SettingComboBox_SelectionChanged"
-                        Tag="mode">
-                        <ComboBoxItem x:Uid="ModeToggle" Tag="toggle" />
-                        <ComboBoxItem x:Uid="ModeLeftOffRightOn" Tag="leftOffRightOn" />
-                        <ComboBoxItem x:Uid="ModeDisabled" Tag="disabled" />
-                    </ComboBox>
-                </controls:SettingsCard>
+                    </controls:SettingsExpander.HeaderIcon>
+                    <controls:SettingsExpander.Items>
+                        <controls:SettingsCard x:Uid="LeftAltCard">
+                            <ComboBox x:Name="LeftAltComboBox" SelectionChanged="KeyComboBox_SelectionChanged" Tag="leftAlt">
+                                <ComboBoxItem x:Uid="KeyActionToggle" Tag="toggle" />
+                                <ComboBoxItem x:Uid="KeyActionOn" Tag="on" />
+                                <ComboBoxItem x:Uid="KeyActionOff" Tag="off" />
+                                <ComboBoxItem x:Uid="KeyActionNone" Tag="none" />
+                            </ComboBox>
+                        </controls:SettingsCard>
+                        <controls:SettingsCard x:Uid="RightAltCard">
+                            <ComboBox x:Name="RightAltComboBox" SelectionChanged="KeyComboBox_SelectionChanged" Tag="rightAlt">
+                                <ComboBoxItem x:Uid="KeyActionToggle" Tag="toggle" />
+                                <ComboBoxItem x:Uid="KeyActionOn" Tag="on" />
+                                <ComboBoxItem x:Uid="KeyActionOff" Tag="off" />
+                                <ComboBoxItem x:Uid="KeyActionNone" Tag="none" />
+                            </ComboBox>
+                        </controls:SettingsCard>
+                        <controls:SettingsCard x:Uid="LeftWinCard">
+                            <ComboBox x:Name="LeftWinComboBox" SelectionChanged="KeyComboBox_SelectionChanged" Tag="leftWin">
+                                <ComboBoxItem x:Uid="KeyActionToggle" Tag="toggle" />
+                                <ComboBoxItem x:Uid="KeyActionOn" Tag="on" />
+                                <ComboBoxItem x:Uid="KeyActionOff" Tag="off" />
+                                <ComboBoxItem x:Uid="KeyActionNone" Tag="none" />
+                            </ComboBox>
+                        </controls:SettingsCard>
+                        <controls:SettingsCard x:Uid="RightWinCard">
+                            <ComboBox x:Name="RightWinComboBox" SelectionChanged="KeyComboBox_SelectionChanged" Tag="rightWin">
+                                <ComboBoxItem x:Uid="KeyActionToggle" Tag="toggle" />
+                                <ComboBoxItem x:Uid="KeyActionOn" Tag="on" />
+                                <ComboBoxItem x:Uid="KeyActionOff" Tag="off" />
+                                <ComboBoxItem x:Uid="KeyActionNone" Tag="none" />
+                            </ComboBox>
+                        </controls:SettingsCard>
+                    </controls:SettingsExpander.Items>
+                </controls:SettingsExpander>
 
                 <controls:SettingsCard x:Uid="DoubleTapCard">
                     <controls:SettingsCard.HeaderIcon>

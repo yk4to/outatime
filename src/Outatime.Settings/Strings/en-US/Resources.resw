@@ -24,40 +24,55 @@
     <value>Outatime isn't running in the background</value>
   </data>
   <data name="NotRunningInfoBar.Message" xml:space="preserve">
-    <value>The Alt keys don't switch the IME while it isn't running.</value>
+    <value>The keys don't switch the IME while it isn't running.</value>
   </data>
   <data name="StartButton.Content" xml:space="preserve">
     <value>Start</value>
   </data>
 
-  <data name="ModeCard.Header" xml:space="preserve">
-    <value>Alt key behavior</value>
+  <data name="KeysExpander.Header" xml:space="preserve">
+    <value>Keys</value>
   </data>
-  <data name="ModeCard.Description" xml:space="preserve">
-    <value>What happens when you press an Alt key on its own</value>
+  <data name="KeysExpander.Description" xml:space="preserve">
+    <value>What happens when you press a key on its own</value>
   </data>
-  <data name="ModeToggle.Content" xml:space="preserve">
-    <value>Left Alt toggles the IME</value>
+  <data name="LeftAltCard.Header" xml:space="preserve">
+    <value>Left Alt</value>
   </data>
-  <data name="ModeLeftOffRightOn.Content" xml:space="preserve">
-    <value>Left Alt turns the IME off, Right Alt turns it on</value>
+  <data name="RightAltCard.Header" xml:space="preserve">
+    <value>Right Alt</value>
   </data>
-  <data name="ModeDisabled.Content" xml:space="preserve">
+  <data name="LeftWinCard.Header" xml:space="preserve">
+    <value>Left Windows key</value>
+  </data>
+  <data name="RightWinCard.Header" xml:space="preserve">
+    <value>Right Windows key</value>
+  </data>
+  <data name="KeyActionToggle.Content" xml:space="preserve">
+    <value>Toggle the IME</value>
+  </data>
+  <data name="KeyActionOn.Content" xml:space="preserve">
+    <value>Turn the IME on</value>
+  </data>
+  <data name="KeyActionOff.Content" xml:space="preserve">
+    <value>Turn the IME off</value>
+  </data>
+  <data name="KeyActionNone.Content" xml:space="preserve">
     <value>Do nothing</value>
   </data>
 
   <data name="DoubleTapCard.Header" xml:space="preserve">
-    <value>Double-tap Alt for a regular Alt</value>
+    <value>Double-tap for a regular key press</value>
   </data>
   <data name="DoubleTapCard.Description" xml:space="preserve">
-    <value>Press the same Alt key twice quickly to undo the IME switch and use Alt as usual, such as to open the menu bar.</value>
+    <value>Press the same key twice quickly to undo the IME switch and use the key as usual, such as to open the menu bar or the Start menu.</value>
   </data>
 
   <data name="FullScreenCard.Header" xml:space="preserve">
     <value>Pause in full-screen apps</value>
   </data>
   <data name="FullScreenCard.Description" xml:space="preserve">
-    <value>Lets games use the Alt key as usual. "All full-screen apps" also includes other apps that Windows reports as full screen.</value>
+    <value>Lets games use the Alt and Windows keys as usual. "All full-screen apps" also includes other apps that Windows reports as full screen.</value>
   </data>
   <data name="FullScreenOff.Content" xml:space="preserve">
     <value>Off</value>
@@ -73,7 +88,7 @@
     <value>Respond to keys sent by other apps</value>
   </data>
   <data name="InjectedKeysCard.Description" xml:space="preserve">
-    <value>Lets the Alt keys switch the IME when you use this PC through a remote desktop app. Apps or scripts that send an Alt key on its own may also switch it.</value>
+    <value>Lets the keys switch the IME when you use this PC through a remote desktop app. Apps or scripts that send an Alt or Windows key on its own may also switch it.</value>
   </data>
 
   <data name="StartupCard.Header" xml:space="preserve">

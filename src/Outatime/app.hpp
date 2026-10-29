@@ -4,14 +4,14 @@
 
 #include <optional>
 
-#include "alt_tap_hook.hpp"
 #include "settings.hpp"
+#include "tap_hook.hpp"
 #include "tray_icon.hpp"
 
 namespace outatime {
 
 // The resident process: a hidden window that owns the tray icon, switches the
-// IME on Alt taps reported by the hook, and follows settings.json. Create one
+// IME on key taps reported by the hook, and follows settings.json. Create one
 // per process, after making sure no other instance is running.
 class App {
 public:
@@ -24,12 +24,12 @@ public:
     int Run();
 
 private:
-    // Whether Alt taps switch the IME right now, shown by the tray icon and tooltip.
+    // Whether taps switch the IME right now, shown by the tray icon and tooltip.
     enum class Status {
         Active,
         Paused,            // From the tray menu
         PausedFullScreen,  // A full-screen app is in front
-        Off,               // Mode is "disabled" in the settings
+        Off,               // No key does anything in the settings
     };
 
     // What the last tap changed, so a double tap can put it back and the
@@ -48,13 +48,14 @@ private:
     void OnCommand(UINT id);
     void ShowTrayMenu(POINT point);
 
+    TapKeySet AssignedKeys() const;
     Status CurrentStatus() const;
     void UpdateStatus();
     void UpdateTrayIcon();
     void ReloadSettings();
 
-    void OnAltTap(AltKey key, HWND foreground);
-    void OnAltDoubleTap();
+    void OnTap(TapKey key, HWND foreground);
+    void OnDoubleTap();
 
     // SetWinEventHook callbacks get no context, and there is only one App.
     static App* current_;

@@ -69,8 +69,12 @@ public sealed partial class MainWindow : Window
 
     private void LoadSettingsFile()
     {
-        Select(ModeComboBox, SettingsStore.Get(SettingsStore.ModeKey, SettingsStore.DefaultMode),
-            SettingsStore.DefaultMode);
+        var keyActions = SettingsStore.GetKeyActions();
+        foreach (var box in new[] { LeftAltComboBox, RightAltComboBox, LeftWinComboBox, RightWinComboBox })
+        {
+            var key = (string)box.Tag;
+            Select(box, keyActions[key], SettingsStore.DefaultKeyActions[key]);
+        }
         Select(FullScreenComboBox,
             SettingsStore.Get(SettingsStore.FullScreenPauseKey, SettingsStore.DefaultFullScreenPause),
             SettingsStore.DefaultFullScreenPause);
@@ -127,6 +131,17 @@ public sealed partial class MainWindow : Window
             return;
         }
         await SaveAsync(() => SettingsStore.Set(key, value));
+    }
+
+    // For the tap keys: the box's Tag is the key's name under "keys", each item's Tag the action.
+    private async void KeyComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_updatingSelection ||
+            sender is not ComboBox { Tag: string key, SelectedItem: ComboBoxItem { Tag: string action } })
+        {
+            return;
+        }
+        await SaveAsync(() => SettingsStore.SetKeyAction(key, action));
     }
 
     // For toggle switches backed by settings.json: the switch's Tag is the key.

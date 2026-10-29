@@ -23,39 +23,54 @@
     <value>Outatime がバックグラウンドで実行されていません</value>
   </data>
   <data name="NotRunningInfoBar.Message" xml:space="preserve">
-    <value>実行されていない間は、Alt キーで IME を切り替えられません。</value>
+    <value>実行されていない間は、キーで IME を切り替えられません。</value>
   </data>
   <data name="StartButton.Content" xml:space="preserve">
     <value>起動</value>
   </data>
-  <data name="ModeCard.Header" xml:space="preserve">
-    <value>Alt キーの動作</value>
+  <data name="KeysExpander.Header" xml:space="preserve">
+    <value>キーの割り当て</value>
   </data>
-  <data name="ModeCard.Description" xml:space="preserve">
-    <value>Alt キーを単独で押したときの動作</value>
+  <data name="KeysExpander.Description" xml:space="preserve">
+    <value>キーを単独で押したときの動作</value>
   </data>
-  <data name="ModeToggle.Content" xml:space="preserve">
-    <value>左 Alt で IME を切り替える</value>
+  <data name="LeftAltCard.Header" xml:space="preserve">
+    <value>左 Alt</value>
   </data>
-  <data name="ModeLeftOffRightOn.Content" xml:space="preserve">
-    <value>左 Alt で IME をオフ、右 Alt でオン</value>
+  <data name="RightAltCard.Header" xml:space="preserve">
+    <value>右 Alt</value>
   </data>
-  <data name="ModeDisabled.Content" xml:space="preserve">
+  <data name="LeftWinCard.Header" xml:space="preserve">
+    <value>左 Windows キー</value>
+  </data>
+  <data name="RightWinCard.Header" xml:space="preserve">
+    <value>右 Windows キー</value>
+  </data>
+  <data name="KeyActionToggle.Content" xml:space="preserve">
+    <value>IME を切り替える</value>
+  </data>
+  <data name="KeyActionOn.Content" xml:space="preserve">
+    <value>IME をオン</value>
+  </data>
+  <data name="KeyActionOff.Content" xml:space="preserve">
+    <value>IME をオフ</value>
+  </data>
+  <data name="KeyActionNone.Content" xml:space="preserve">
     <value>何もしない</value>
   </data>
 
   <data name="DoubleTapCard.Header" xml:space="preserve">
-    <value>Alt の 2 回押しで通常の Alt</value>
+    <value>2 回押しで通常のキー入力</value>
   </data>
   <data name="DoubleTapCard.Description" xml:space="preserve">
-    <value>同じ Alt キーを素早く 2 回押すと、IME の切り替えを取り消して、メニュー バーを開くときなどに通常の Alt として使えます。</value>
+    <value>同じキーを素早く 2 回押すと、IME の切り替えを取り消して、メニュー バーやスタート メニューを開くときなどに通常のキーとして使えます。</value>
   </data>
 
   <data name="FullScreenCard.Header" xml:space="preserve">
     <value>全画面アプリで一時停止</value>
   </data>
   <data name="FullScreenCard.Description" xml:space="preserve">
-    <value>ゲームで Alt キーを通常どおり使えるようにします。「すべての全画面アプリ」は、Windows が全画面と判断したほかのアプリも対象です。</value>
+    <value>ゲームで Alt キーや Windows キーを通常どおり使えるようにします。「すべての全画面アプリ」は、Windows が全画面と判断したほかのアプリも対象です。</value>
   </data>
   <data name="FullScreenOff.Content" xml:space="preserve">
     <value>オフ</value>
@@ -70,7 +85,7 @@
     <value>ほかのアプリから送信されたキー入力にも反応する</value>
   </data>
   <data name="InjectedKeysCard.Description" xml:space="preserve">
-    <value>リモート操作アプリからこの PC を操作するときも、Alt キーで IME を切り替えられます。Alt キーだけを送るアプリやスクリプトでも切り替わることがあります。</value>
+    <value>リモート操作アプリからこの PC を操作するときも、キーで IME を切り替えられます。Alt キーや Windows キーだけを送るアプリやスクリプトでも切り替わることがあります。</value>
   </data>
   <data name="StartupCard.Header" xml:space="preserve">
     <value>サインイン時に起動</value>

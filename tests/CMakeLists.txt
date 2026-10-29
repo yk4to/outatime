@@ -10,7 +10,7 @@ set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
 add_executable(outatime_tests
-    alt_tap_detector_test.cpp
+    tap_detector_test.cpp
     settings_test.cpp
 )
 target_compile_options(outatime_tests PRIVATE ${OUTATIME_COMPILE_OPTIONS})

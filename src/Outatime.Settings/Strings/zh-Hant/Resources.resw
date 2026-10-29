@@ -23,39 +23,54 @@
     <value>Outatime 未在背景執行</value>
   </data>
   <data name="NotRunningInfoBar.Message" xml:space="preserve">
-    <value>未執行時無法使用 Alt 鍵切換輸入法。</value>
+    <value>未執行時無法使用按鍵切換輸入法。</value>
   </data>
   <data name="StartButton.Content" xml:space="preserve">
     <value>啟動</value>
   </data>
-  <data name="ModeCard.Header" xml:space="preserve">
-    <value>Alt 鍵行為</value>
+  <data name="KeysExpander.Header" xml:space="preserve">
+    <value>按鍵指派</value>
   </data>
-  <data name="ModeCard.Description" xml:space="preserve">
-    <value>單獨按下 Alt 鍵時執行的動作</value>
+  <data name="KeysExpander.Description" xml:space="preserve">
+    <value>單獨按下按鍵時執行的動作</value>
   </data>
-  <data name="ModeToggle.Content" xml:space="preserve">
-    <value>左 Alt 鍵切換輸入法</value>
+  <data name="LeftAltCard.Header" xml:space="preserve">
+    <value>左 Alt</value>
   </data>
-  <data name="ModeLeftOffRightOn.Content" xml:space="preserve">
-    <value>左 Alt 鍵關閉輸入法，右 Alt 鍵開啟輸入法</value>
+  <data name="RightAltCard.Header" xml:space="preserve">
+    <value>右 Alt</value>
   </data>
-  <data name="ModeDisabled.Content" xml:space="preserve">
+  <data name="LeftWinCard.Header" xml:space="preserve">
+    <value>左 Windows 鍵</value>
+  </data>
+  <data name="RightWinCard.Header" xml:space="preserve">
+    <value>右 Windows 鍵</value>
+  </data>
+  <data name="KeyActionToggle.Content" xml:space="preserve">
+    <value>切換輸入法</value>
+  </data>
+  <data name="KeyActionOn.Content" xml:space="preserve">
+    <value>開啟輸入法</value>
+  </data>
+  <data name="KeyActionOff.Content" xml:space="preserve">
+    <value>關閉輸入法</value>
+  </data>
+  <data name="KeyActionNone.Content" xml:space="preserve">
     <value>不執行任何動作</value>
   </data>
 
   <data name="DoubleTapCard.Header" xml:space="preserve">
-    <value>按兩次 Alt 作為一般 Alt</value>
+    <value>按兩次作為一般按鍵</value>
   </data>
   <data name="DoubleTapCard.Description" xml:space="preserve">
-    <value>快速按兩次同一個 Alt 鍵，可取消輸入法切換，並照常使用 Alt，例如開啟功能表列。</value>
+    <value>快速按兩次同一個鍵，可取消輸入法切換，並照常使用該鍵，例如開啟功能表列或 [開始] 功能表。</value>
   </data>
 
   <data name="FullScreenCard.Header" xml:space="preserve">
     <value>在全螢幕應用程式中暫停</value>
   </data>
   <data name="FullScreenCard.Description" xml:space="preserve">
-    <value>讓遊戲可以正常使用 Alt 鍵。「所有全螢幕應用程式」也包括 Windows 判定為全螢幕的其他應用程式。</value>
+    <value>讓遊戲可以正常使用 Alt 鍵和 Windows 鍵。「所有全螢幕應用程式」也包括 Windows 判定為全螢幕的其他應用程式。</value>
   </data>
   <data name="FullScreenOff.Content" xml:space="preserve">
     <value>關閉</value>
@@ -70,7 +85,7 @@
     <value>回應其他應用程式傳送的按鍵輸入</value>
   </data>
   <data name="InjectedKeysCard.Description" xml:space="preserve">
-    <value>透過遠端控制應用程式操作這台電腦時，也能用 Alt 鍵切換輸入法。單獨傳送 Alt 鍵的應用程式或指令碼也可能觸發切換。</value>
+    <value>透過遠端控制應用程式操作這台電腦時，也能用按鍵切換輸入法。單獨傳送 Alt 鍵或 Windows 鍵的應用程式或指令碼也可能觸發切換。</value>
   </data>
   <data name="StartupCard.Header" xml:space="preserve">
     <value>登入時啟動</value>
