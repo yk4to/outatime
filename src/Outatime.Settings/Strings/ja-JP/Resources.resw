@@ -19,6 +19,12 @@
   <data name="SettingsTitle.Text" xml:space="preserve">
     <value>設定</value>
   </data>
+  <data name="BuildMismatchInfoBar.Title" xml:space="preserve">
+    <value>バックグラウンドで実行中の Outatime のバージョンが異なります</value>
+  </data>
+  <data name="BuildMismatchInfoBar.Message" xml:space="preserve">
+    <value>この設定アプリとは別のバージョンが実行されています。再起動すると同じバージョンに切り替わります。</value>
+  </data>
   <data name="NotRunningInfoBar.Title" xml:space="preserve">
     <value>Outatime がバックグラウンドで実行されていません</value>
   </data>

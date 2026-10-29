@@ -19,6 +19,12 @@
   <data name="SettingsTitle.Text" xml:space="preserve">
     <value>设置</value>
   </data>
+  <data name="BuildMismatchInfoBar.Title" xml:space="preserve">
+    <value>在后台运行的 Outatime 版本不同</value>
+  </data>
+  <data name="BuildMismatchInfoBar.Message" xml:space="preserve">
+    <value>正在运行的版本与此设置应用不同。重新启动即可切换到相同的版本。</value>
+  </data>
   <data name="NotRunningInfoBar.Title" xml:space="preserve">
     <value>Outatime 未在后台运行</value>
   </data>

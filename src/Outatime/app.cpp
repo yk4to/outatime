@@ -82,7 +82,7 @@ int App::Run() {
 
     // A hidden top-level window (not message-only) so it receives TaskbarCreated broadcasts
     // and the settings app can find it with FindWindow.
-    if (!CreateWindowExW(0, kWindowClass, kAppName, WS_OVERLAPPED, 0, 0, 0, 0, nullptr, nullptr,
+    if (!CreateWindowExW(0, kWindowClass, kWindowTitle, WS_OVERLAPPED, 0, 0, 0, 0, nullptr, nullptr,
                          instance_, this)) {
         return 1;
     }

@@ -19,6 +19,10 @@ public sealed partial class MainWindow : Window
     // The resident process closes windows with this property when the user exits it (settings_app.cpp).
     private const string WindowProperty = "Outatime.Settings";
 
+    // This app's commit. The .NET SDK appends it to the informational version: "0.1.0+<sha>".
+    private static readonly string? Commit = CommitOf(Assembly.GetExecutingAssembly()
+        .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion);
+
     private readonly ResourceLoader _resources = new();
     private readonly nint _hwnd;
     private readonly ResidentMonitor _resident;
@@ -97,20 +101,20 @@ public sealed partial class MainWindow : Window
 
     private void ShowBuildInfo()
     {
-        var assembly = Assembly.GetExecutingAssembly();
-        var version = assembly.GetName().Version!.ToString(3);
+        var version = Assembly.GetExecutingAssembly().GetName().Version!.ToString(3);
         AboutExpander.Description = string.Format(CultureInfo.CurrentCulture, _resources.GetString("AboutVersion"), version);
-
-        // The .NET SDK appends the git commit to the informational version: "0.1.0+<sha>".
-        var informational = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
-        var commit = informational?.Split('+') is [_, var sha, ..] ? sha[..Math.Min(7, sha.Length)] : null;
 #if DEBUG
         const string configuration = "Debug";
 #else
         const string configuration = "Release";
 #endif
-        BuildInfoText.Text = commit is null ? configuration : $"{commit} · {configuration}";
+        BuildInfoText.Text = Commit is null ? configuration : $"{ShortCommit(Commit)} · {configuration}";
     }
+
+    // The commit in a "<version>+<commit>" string, or null if it has none.
+    private static string? CommitOf(string? version) => version?.Split('+') is [_, var sha, ..] ? sha : null;
+
+    private static string ShortCommit(string sha) => sha[..Math.Min(7, sha.Length)];
 
     public void BringToFront()
     {
@@ -204,6 +208,10 @@ public sealed partial class MainWindow : Window
         RestartInfoBar.IsOpen = elevated is not null && elevated != ShouldRunElevated;
         RestartInfoBar.Title = _resources.GetString(ShouldRunElevated ? "RestartElevatedTitle" : "RestartNormalTitle");
         RestartInfoBar.Message = _resources.GetString("RestartMessage");
+
+        // A resident from before it reported its commit has none, which counts as different too.
+        BuildMismatchInfoBar.IsOpen = Commit is not null && _resident.Version is not null &&
+            !string.Equals(CommitOf(_resident.Version), Commit, StringComparison.OrdinalIgnoreCase);
     }
 
     private async void StartButton_Click(object sender, RoutedEventArgs e)
@@ -211,9 +219,10 @@ public sealed partial class MainWindow : Window
         await RunResidentActionAsync(StartButton, "StartErrorTitle", () => ResidentProcess.StartAsync(ShouldRunElevated));
     }
 
+    // Also restarts into the build next to this app, when the running one differs.
     private async void RestartButton_Click(object sender, RoutedEventArgs e)
     {
-        await RunResidentActionAsync(RestartButton, "RestartErrorTitle", () => ResidentProcess.RestartAsync(ShouldRunElevated));
+        await RunResidentActionAsync((Button)sender, "RestartErrorTitle", () => ResidentProcess.RestartAsync(ShouldRunElevated));
     }
 
     private async Task RunResidentActionAsync(Button button, string errorTitleKey, Func<Task> action)

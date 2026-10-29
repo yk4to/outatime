@@ -24,6 +24,21 @@ internal static partial class ResidentProcess
         return hwnd == 0 ? null : GetPropW(hwnd, ElevatedProperty) != 0;
     }
 
+    // The resident's version from its window's title, "<version>+<commit>" like this
+    // app's informational version, or null if it is not running.
+    public static unsafe string? GetVersion()
+    {
+        var hwnd = FindWindowW(WindowClass, null);
+        if (hwnd == 0)
+        {
+            return null;
+        }
+        // Reads the title without sending WM_GETTEXT, so it works on an elevated resident too.
+        const int capacity = 256;
+        var buffer = stackalloc char[capacity];
+        return new string(buffer, 0, GetWindowTextW(hwnd, buffer, capacity));
+    }
+
     public static async Task RestartAsync(bool elevated)
     {
         var hwnd = FindWindowW(WindowClass, null);
@@ -93,6 +108,9 @@ internal static partial class ResidentProcess
 
     [LibraryImport("user32.dll", StringMarshalling = StringMarshalling.Utf16)]
     private static partial nint GetPropW(nint hwnd, string name);
+
+    [LibraryImport("user32.dll")]
+    private static unsafe partial int GetWindowTextW(nint hwnd, char* text, int maxCount);
 
     [LibraryImport("user32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
