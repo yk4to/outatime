@@ -2,12 +2,10 @@
   <!-- Keep these solid paths and their transform identical to outatime.svg. -->
   <g transform="matrix(1.111111 0 0 1.142857 -1.555556 -3.428571)">
     <mask id="cyan-mask" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="8" y="10" width="34" height="28">
-      <path d="M9 11H26.4545L41 24L26.4545 37H9L22.0909 24L9 11Z" fill="white" stroke-width="2" stroke-linejoin="round" stroke="white"/>
+      <path d="M9 11H26.4545L41 24L26.4545 37H9L22.0909 24L9 11Z" fill="white" stroke="white" stroke-width="2" stroke-linejoin="round"/>
     </mask>
-    <g mask="url(#cyan-mask)">
-      <path d="M25.3125 12.1875L38.4375 24L25.3125 35.8125" stroke-width="5" stroke-linecap="square" stroke-linejoin="round" stroke="#5EE9FF"/>
-    </g>
-    <path d="M6 11H23.4545L38 24L23.4545 37H6L19.0909 24L6 11Z" fill="url(#orange)" stroke-width="2" stroke-linejoin="round" stroke="url(#orange)"/>
+    <path d="M25.3125 12.1875L38.4375 24L25.3125 35.8125" stroke="#5EE9FF" stroke-width="5" stroke-linecap="square" stroke-linejoin="round" mask="url(#cyan-mask)"/>
+    <path d="M6 11H23.4545L38 24L23.4545 37H6L19.0909 24L6 11Z" fill="url(#orange)" stroke="url(#orange)" stroke-width="2" stroke-linejoin="round"/>
   </g>
   <defs>
     <linearGradient id="orange" x1="6" y1="11" x2="31.4494" y2="42.3224" gradientUnits="userSpaceOnUse">
