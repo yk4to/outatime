@@ -1,15 +1,11 @@
 <svg width="16" height="16" viewBox="2.666667 2.666667 42.666666 42.666666" fill="none" xmlns="http://www.w3.org/2000/svg">
   <!-- Keep these solid paths and their transform identical to outatime.svg. -->
   <g transform="matrix(1.111111 0 0 1.142857 -1.555556 -3.428571)">
-    <mask id="cyan-mask" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="8" y="10" width="34" height="28">
-      <path d="M9 11H26.4545L41 24L26.4545 37H9L22.0909 24L9 11Z" fill="white" stroke-width="2" stroke-linejoin="round" stroke="white"/>
-    </mask>
-    <g mask="url(#cyan-mask)">
-      <path d="M25.3125 12.1875L38.4375 24L25.3125 35.8125" stroke-width="5" stroke-linecap="square" stroke-linejoin="round" stroke="#5EE9FF"/>
-    </g>
-    <path d="M6 11H23.4545L38 24L23.4545 37H6L19.0909 24L6 11Z" fill="url(#orange)" stroke-width="2" stroke-linejoin="round" stroke="url(#orange)"/>
+    <path d="M23.95 10H26.65L40.1101 22.1418A2.5 2.5 0 0 1 40.1101 25.8582L26.65 38H23.95L21.782 35.626 34.699 24 21.782 12.374Z" fill="#5EE9FF"/>
+    <use href="#arrow" fill="url(#orange)" stroke="url(#orange)" stroke-width="2" stroke-linejoin="round"/>
   </g>
   <defs>
+    <path id="arrow" d="M6 11H23.4545L38 24L23.4545 37H6L19.0909 24L6 11Z"/>
     <linearGradient id="orange" x1="6" y1="11" x2="31.4494" y2="42.3224" gradientUnits="userSpaceOnUse">
       <stop stop-color="#FFCF64"/>
       <stop offset="0.5" stop-color="#D9651B"/>
