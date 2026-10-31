@@ -2,10 +2,7 @@
   <g transform="matrix(1.111111 0 0 1.142857 -1.555556 -3.428571)">
     <use href="#arrow" stroke="white" stroke-width="2" stroke-linejoin="round" shape-rendering="crispEdges" filter="url(#shadow)"/>
     <g filter="url(#glow)">
-      <mask id="cyan-mask" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="8" y="10" width="34" height="28">
-        <use href="#arrow" x="3" fill="white" stroke="white" stroke-width="2" stroke-linejoin="round"/>
-      </mask>
-      <path d="M25.3125 12.1875L38.4375 24L25.3125 35.8125" stroke="#5EE9FF" stroke-width="5" stroke-linecap="square" stroke-linejoin="round" mask="url(#cyan-mask)"/>
+      <path d="M23.95 10H26.65L40.1101 22.1418A2.5 2.5 0 0 1 40.1101 25.8582L26.65 38H23.95L21.782 35.626 34.699 24 21.782 12.374Z" fill="#5EE9FF"/>
     </g>
     <use href="#arrow" fill="url(#orange)" stroke="url(#orange)" stroke-width="2" stroke-linejoin="round"/>
   </g>
