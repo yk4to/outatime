@@ -1,7 +1,7 @@
 name: CI
 
-# Not for changes to Markdown files only, which nothing here builds or checks
-# beyond .editorconfig.
+# Not for changes to Markdown files only, which nothing here builds or checks.
+# Formatting, .editorconfig included, is checked by format.yml.
 on:
   push:
     branches: [main]
@@ -14,28 +14,6 @@ permissions:
   contents: read
 
 jobs:
-  # Formatting only, which needs neither Windows nor a build.
-  format:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-dotnet@v6
-        with:
-          dotnet-version: 10.0.x
-      # Charset, line endings, final newline, trailing whitespace and tabs in every
-      # file, per .editorconfig. Indent widths are left to the formatters below.
-      - uses: editorconfig-checker/action-editorconfig-checker@v3.0.0
-        with:
-          version: v4.0.2  # Also pinned in .editorconfig-checker.json
-      - name: Check .editorconfig rules
-        run: editorconfig-checker
-      # Same version as the clang-format bundled with Visual Studio.
-      - name: Check C++ formatting
-        run: pipx run clang-format==22.1.3 --dry-run --Werror src/Outatime/*.cpp src/Outatime/*.hpp tests/*.cpp
-      # --folder checks the files without loading the WinUI project.
-      - name: Check C# formatting
-        run: dotnet format whitespace src/Outatime.Settings --folder --verify-no-changes
-
   # Builds, tests and packages. C# analyzers and C++ warnings fail the build
   # here, since CI=true turns warnings into errors.
   build:
