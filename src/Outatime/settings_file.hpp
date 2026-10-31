@@ -7,7 +7,7 @@
 
 namespace outatime {
 
-// %APPDATA%\Outatime
+// %APPDATA%\Outatime, or in the MSIX package, the package's LocalState folder.
 std::filesystem::path SettingsDirectory();
 
 // Returns defaults if settings.json does not exist, or nullopt if it exists

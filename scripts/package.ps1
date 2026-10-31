@@ -1,4 +1,5 @@
-# Builds Release binaries and packs them into dist\Outatime-<version>-win-x64.zip.
+# Builds Release binaries and packs them into dist\Outatime-<version>-win-x64.zip,
+# and into dist\Outatime-<version>-win-x64.msix for the Microsoft Store.
 param(
     [string]$Version = (git rev-parse --short HEAD)
 )
@@ -37,3 +38,12 @@ Get-ChildItem $stage -Recurse -Filter *.pdb | Remove-Item
 $zip = Join-Path $dist "Outatime-$Version-win-x64.zip"
 Compress-Archive -Path $stage -DestinationPath $zip
 Write-Host "Created $zip"
+
+# Unsigned: the Store signs the package when it's submitted.
+$msixDir = Join-Path $dist 'msix'
+Invoke-Native dotnet publish src/Outatime.Settings -c Release -p:WindowsPackageType=MSIX `
+    -p:GenerateAppxPackageOnBuild=true -p:AppxPackageSigningEnabled=false -p:AppxPackageDir=$msixDir\
+$msix = Join-Path $dist "Outatime-$Version-win-x64.msix"
+Get-ChildItem $msixDir -Recurse -Filter *.msix | Select-Object -First 1 | Move-Item -Destination $msix
+Remove-Item -Recurse $msixDir
+Write-Host "Created $msix"

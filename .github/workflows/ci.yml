@@ -50,6 +50,10 @@ jobs:
         with:
           name: Outatime-win-x64
           path: dist/Outatime/
+      - uses: actions/upload-artifact@v7
+        with:
+          name: Outatime-win-x64-msix
+          path: dist/*.msix
 
   # clang-tidy, in parallel with the build.
   lint:

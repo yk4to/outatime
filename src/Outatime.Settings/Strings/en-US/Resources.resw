@@ -14,20 +14,20 @@
   </resheader>
 
   <data name="AppTitle" xml:space="preserve">
-    <value>Outatime Settings</value>
+    <value>Outatime Switcher Settings</value>
   </data>
   <data name="SettingsTitle.Text" xml:space="preserve">
     <value>Settings</value>
   </data>
 
   <data name="BuildMismatchInfoBar.Title" xml:space="preserve">
-    <value>Outatime running in the background is a different version</value>
+    <value>Outatime Switcher running in the background is a different version</value>
   </data>
   <data name="BuildMismatchInfoBar.Message" xml:space="preserve">
     <value>It's a different version from these settings. Restart it to switch to the same version.</value>
   </data>
   <data name="NotRunningInfoBar.Title" xml:space="preserve">
-    <value>Outatime isn't running in the background</value>
+    <value>Outatime Switcher isn't running in the background</value>
   </data>
   <data name="NotRunningInfoBar.Message" xml:space="preserve">
     <value>The keys don't switch the IME while it isn't running.</value>
@@ -114,10 +114,10 @@
   </data>
 
   <data name="RestartElevatedTitle" xml:space="preserve">
-    <value>Outatime isn't running as administrator</value>
+    <value>Outatime Switcher isn't running as administrator</value>
   </data>
   <data name="RestartNormalTitle" xml:space="preserve">
-    <value>Outatime is running as administrator</value>
+    <value>Outatime Switcher is running as administrator</value>
   </data>
   <data name="RestartMessage" xml:space="preserve">
     <value>Restart it to apply this setting now.</value>
@@ -137,13 +137,13 @@
     <value>About</value>
   </data>
   <data name="AboutExpander.Header" xml:space="preserve">
-    <value>Outatime</value>
+    <value>Outatime Switcher</value>
   </data>
   <data name="AboutVersion" xml:space="preserve">
     <value>Version {0}</value>
   </data>
   <data name="LicenseCard.Header" xml:space="preserve">
-    <value>Outatime is developed under the MIT License</value>
+    <value>Outatime Switcher is developed under the MIT License</value>
   </data>
   <data name="RepositoryButton.Content" xml:space="preserve">
     <value>GitHub repository</value>
@@ -162,7 +162,7 @@
     <value>Couldn't change the startup setting</value>
   </data>
   <data name="StartErrorTitle" xml:space="preserve">
-    <value>Couldn't start Outatime</value>
+    <value>Couldn't start Outatime Switcher</value>
   </data>
   <data name="OpenSettingsFileErrorTitle" xml:space="preserve">
     <value>Couldn't open the settings file</value>
@@ -171,16 +171,25 @@
     <value>Couldn't open the third-party software licenses</value>
   </data>
   <data name="RestartErrorTitle" xml:space="preserve">
-    <value>Couldn't restart Outatime</value>
+    <value>Couldn't restart Outatime Switcher</value>
   </data>
   <data name="ResidentExitTimeout" xml:space="preserve">
-    <value>Outatime did not exit.</value>
+    <value>Outatime Switcher did not exit.</value>
   </data>
   <data name="ResidentStartTimeout" xml:space="preserve">
-    <value>Outatime did not start.</value>
+    <value>Outatime Switcher did not start.</value>
   </data>
   <data name="SchtasksFailed" xml:space="preserve">
     <value>Task Scheduler reported an error (exit code {0}).</value>
+  </data>
+  <data name="StartupDisabledByUser" xml:space="preserve">
+    <value>Outatime Switcher's startup is turned off in Windows. Turn it on in Settings &gt; Apps &gt; Startup.</value>
+  </data>
+  <data name="StartupDisabledByPolicy" xml:space="preserve">
+    <value>Your organization manages whether Outatime Switcher starts at sign-in.</value>
+  </data>
+  <data name="PackageDescription" xml:space="preserve">
+    <value>Switches the IME with the Alt or Windows keys</value>
   </data>
   <data name="ErrorDialogClose" xml:space="preserve">
     <value>OK</value>

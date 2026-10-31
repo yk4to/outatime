@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Used only for the MSIX package (dotnet publish -p:WindowsPackageType=MSIX).
+     The package has Outatime.exe and Outatime.Settings.exe at its root. -->
+<Package
+  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
+  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+  IgnorableNamespaces="uap desktop rescap">
+
+  <!-- Name, Publisher and PublisherDisplayName are from the app's Product identity page in
+       Partner Center. Version is <Version> in Outatime.Settings.csproj plus ".0". -->
+  <Identity Name="YKato.OutatimeSwitcher" Publisher="CN=E840E022-A3F2-4BE3-906A-FA75CD5E95D6" Version="1.0.0.0" />
+
+  <!-- The Store requires this DisplayName, and the Start menu's below, to be the name reserved
+       in Partner Center. -->
+  <Properties>
+    <DisplayName>Outatime Switcher</DisplayName>
+    <PublisherDisplayName>Y Kato</PublisherDisplayName>
+    <Logo>Assets\StoreLogo.png</Logo>
+  </Properties>
+
+  <Dependencies>
+    <!-- The build sets both versions from TargetPlatformMinVersion and TargetFramework. -->
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.19041.0" MaxVersionTested="10.0.19041.0" />
+  </Dependencies>
+
+  <Resources>
+    <Resource Language="x-generate" />
+  </Resources>
+
+  <Applications>
+    <!-- The Start menu entry. Started again while running, it opens the settings app. -->
+    <Application Id="Outatime" Executable="Outatime.exe" EntryPoint="Windows.FullTrustApplication">
+      <uap:VisualElements
+        DisplayName="Outatime Switcher"
+        Description="ms-resource:PackageDescription"
+        BackgroundColor="transparent"
+        Square150x150Logo="Assets\Square150x150Logo.png"
+        Square44x44Logo="Assets\Square44x44Logo.png" />
+      <Extensions>
+        <!-- Replaces the Run key, which the package can't write. The settings app turns it on. -->
+        <desktop:Extension Category="windows.startupTask" Executable="Outatime.exe" EntryPoint="Windows.FullTrustApplication">
+          <desktop:StartupTask TaskId="Outatime" Enabled="false" DisplayName="Outatime Switcher" />
+        </desktop:Extension>
+      </Extensions>
+    </Application>
+    <Application Id="Settings" Executable="Outatime.Settings.exe" EntryPoint="Windows.FullTrustApplication">
+      <uap:VisualElements
+        DisplayName="ms-resource:AppTitle"
+        Description="ms-resource:PackageDescription"
+        BackgroundColor="transparent"
+        Square150x150Logo="Assets\Square150x150Logo.png"
+        Square44x44Logo="Assets\Square44x44Logo.png"
+        AppListEntry="none" />
+    </Application>
+  </Applications>
+
+  <Capabilities>
+    <!-- Both apps are regular desktop apps, outside the app container. -->
+    <rescap:Capability Name="runFullTrust" />
+  </Capabilities>
+</Package>

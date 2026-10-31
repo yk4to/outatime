@@ -1,6 +1,7 @@
 #include <windows.h>
 
 #include "app.hpp"
+#include "settings_app.hpp"
 #include "shared_names.hpp"
 
 int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int) {
@@ -8,6 +9,8 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int) {
     // ERROR_ACCESS_DENIED: an elevated instance owns the mutex.
     if (const DWORD error = GetLastError();
         error == ERROR_ALREADY_EXISTS || error == ERROR_ACCESS_DENIED) {
+        // Started again, such as from the Start menu: show something rather than nothing.
+        outatime::OpenSettingsApp(nullptr);
         return 0;
     }
 
