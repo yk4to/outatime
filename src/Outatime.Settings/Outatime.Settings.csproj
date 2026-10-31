@@ -97,4 +97,19 @@
       Text="Package.appxmanifest has version $(PackageManifestVersion), but &lt;Version&gt; is $(Version). Set it to $(Version).0." />
   </Target>
 
+  <!-- The MSIX tooling leaves out the managed DLLs under Native AOT, but not the files that only
+       the .NET host reads, which the native exe doesn't use. The zip's publish has neither. -->
+  <Target
+    Name="RemoveHostFilesFromPackage"
+    AfterTargets="WinAppSdkRemoveLinkedFilesFromPayload"
+    BeforeTargets="_ComputeAppxPackagePayload"
+    Condition="'$(WindowsPackageType)' == 'MSIX' and '$(PublishAot)' == 'true'">
+    <ItemGroup>
+      <_HostFilesInPackage
+        Include="@(PackagingOutputs)"
+        Condition="'%(Filename)%(Extension)' == '$(AssemblyName).deps.json' or '%(Filename)%(Extension)' == '$(AssemblyName).runtimeconfig.json'" />
+      <PackagingOutputs Remove="@(_HostFilesInPackage)" />
+    </ItemGroup>
+  </Target>
+
 </Project>
