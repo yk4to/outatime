@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using CommunityToolkit.WinUI.Controls;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -45,10 +46,13 @@ public sealed partial class MainWindow : Window
         var scale = GetDpiForWindow(_hwnd) / 96.0;
         AppWindow.Resize(new SizeInt32((int)(DefaultWidth * scale), (int)(DefaultHeight * scale)));
 
-        _startupMode = StartupManager.GetMode();
-        _updatingSelection = true;
-        StartupComboBox.SelectedIndex = (int)_startupMode;
-        _updatingSelection = false;
+        if (AppPackage.IsPackaged)
+        {
+            // The package can't run the resident as administrator, which the description is about.
+            StartupComboBox.Items.Remove(StartupElevatedItem);
+            StartupCard.ClearValue(SettingsCard.DescriptionProperty);
+        }
+        LoadStartupMode();
         LoadSettingsFile();
 
         SettingsFileCard.Description = SettingsStore.FilePath;
@@ -69,6 +73,17 @@ public sealed partial class MainWindow : Window
                 LoadSettingsFile();
             }
         };
+    }
+
+    private async void LoadStartupMode()
+    {
+        StartupComboBox.IsEnabled = false;
+        _startupMode = await StartupManager.GetModeAsync();
+        _updatingSelection = true;
+        StartupComboBox.SelectedIndex = (int)_startupMode;
+        _updatingSelection = false;
+        StartupComboBox.IsEnabled = true;
+        UpdateResidentInfoBars();
     }
 
     private void LoadSettingsFile()
@@ -259,10 +274,9 @@ public sealed partial class MainWindow : Window
         }
     }
 
-    // Next to Outatime.exe, one level above the settings app, as in the zip.
     private async void OpenThirdPartyNoticesButton_Click(object sender, RoutedEventArgs e)
     {
-        var path = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "THIRD-PARTY-NOTICES.txt"));
+        var path = Path.Combine(AppPackage.ResidentDirectory, "THIRD-PARTY-NOTICES.txt");
         try
         {
             Process.Start(new ProcessStartInfo(path) { UseShellExecute = true })?.Dispose();

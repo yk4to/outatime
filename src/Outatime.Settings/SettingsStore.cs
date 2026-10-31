@@ -1,9 +1,10 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using Windows.Storage;
 
 namespace Outatime.Settings;
 
-// Reads and writes %APPDATA%\Outatime\settings.json, which the resident process watches.
+// Reads and writes settings.json, which the resident process watches.
 internal static class SettingsStore
 {
     // Keys, values and defaults must match settings.hpp/.cpp in the resident process.
@@ -26,8 +27,11 @@ internal static class SettingsStore
 
     private static readonly string[] KeyActions = ["none", "toggle", "on", "off"];
 
-    private static readonly string SettingsDirectory = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Outatime");
+    // Must match settings_file.cpp in the resident process. In the package, new files under
+    // %APPDATA% go to a private copy that editors outside the package can't see.
+    private static readonly string SettingsDirectory = AppPackage.IsPackaged
+        ? ApplicationData.Current.LocalFolder.Path
+        : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Outatime");
 
     public static readonly string FilePath = Path.Combine(SettingsDirectory, "settings.json");
 

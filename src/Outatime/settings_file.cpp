@@ -7,14 +7,26 @@
 #include <iterator>
 #include <string>
 
+#include "win_util.hpp"
+
 namespace outatime {
 
+// Must match SettingsStore.cs in the settings app.
 std::filesystem::path SettingsDirectory() {
+    // In the package, new files under %APPDATA% go to a private copy that editors
+    // outside the package can't see. ApplicationData.LocalFolder, which the
+    // settings app uses, is this folder.
+    const std::wstring family = PackageFamilyName();
     PWSTR appData = nullptr;
     std::filesystem::path path;
-    if (SUCCEEDED(
-            SHGetKnownFolderPath(FOLDERID_RoamingAppData, KF_FLAG_DEFAULT, nullptr, &appData))) {
-        path = std::filesystem::path(appData) / L"Outatime";
+    if (family.empty()) {
+        if (SUCCEEDED(SHGetKnownFolderPath(FOLDERID_RoamingAppData, KF_FLAG_DEFAULT, nullptr,
+                                           &appData))) {
+            path = std::filesystem::path(appData) / L"Outatime";
+        }
+    } else if (SUCCEEDED(SHGetKnownFolderPath(FOLDERID_LocalAppData, KF_FLAG_DEFAULT, nullptr,
+                                              &appData))) {
+        path = std::filesystem::path(appData) / L"Packages" / family / L"LocalState";
     }
     CoTaskMemFree(appData);
     return path;

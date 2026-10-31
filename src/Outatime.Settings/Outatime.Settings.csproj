@@ -24,8 +24,8 @@
     <DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
 
     <UseWinUI>true</UseWinUI>
-    <!-- Unpackaged app, distributed as a zip -->
-    <WindowsPackageType>None</WindowsPackageType>
+    <!-- Unpackaged for the zip. -p:WindowsPackageType=MSIX builds the Store package instead. -->
+    <WindowsPackageType Condition="'$(WindowsPackageType)' == ''">None</WindowsPackageType>
     <!-- Needed even when unpackaged: without it the app's .pri is left out of publish. -->
     <EnableMsixTooling>true</EnableMsixTooling>
     <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
@@ -33,6 +33,16 @@
 
     <!-- Same layout as the zip: Outatime.exe + settings\Outatime.Settings.exe -->
     <OutDir>$(MSBuildThisFileDirectory)..\..\build\bin\$(Configuration)\settings\</OutDir>
+    <!-- The package has both exes at its root. -->
+    <OutDir Condition="'$(WindowsPackageType)' == 'MSIX'">$(MSBuildThisFileDirectory)..\..\build\msix\$(Configuration)\</OutDir>
+    <IntermediateOutputPath Condition="'$(WindowsPackageType)' == 'MSIX'">obj\msix\$(Configuration)\</IntermediateOutputPath>
+    <!-- One package with every language. A bundle leaves the languages out of the main
+         package's manifest, so the app would only show English. -->
+    <AppxBundle>Never</AppxBundle>
+
+    <!-- Next to Outatime.exe, where the About section opens it. -->
+    <ThirdPartyNoticesPath>$(OutDir)..\THIRD-PARTY-NOTICES.txt</ThirdPartyNoticesPath>
+    <ThirdPartyNoticesPath Condition="'$(WindowsPackageType)' == 'MSIX'">$(IntermediateOutputPath)THIRD-PARTY-NOTICES.txt</ThirdPartyNoticesPath>
   </PropertyGroup>
 
   <ItemGroup>
@@ -57,9 +67,31 @@
     <PackageReference Include="System.Numerics.Tensors" Version="9.0.0" ExcludeAssets="all" />
   </ItemGroup>
 
-  <!-- Next to Outatime.exe, as in the zip, where the About section opens it. Needs a configured CMake tree. -->
-  <Target Name="GenerateThirdPartyNotices" AfterTargets="Build">
-    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildThisFileDirectory)..\..\scripts\generate-notices.ps1&quot; -Output &quot;$(OutDir)..\THIRD-PARTY-NOTICES.txt&quot;" />
+  <ItemGroup Condition="'$(WindowsPackageType)' == 'MSIX'">
+    <!-- The tile and Start menu images that Package.appxmanifest names (scripts/generate-icons.ps1). -->
+    <Content Include="Assets\*.png" />
+    <!-- Built by CMake first. -->
+    <Content Include="..\..\build\bin\$(Configuration)\Outatime.exe" Link="Outatime.exe" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="$(ThirdPartyNoticesPath)" Link="THIRD-PARTY-NOTICES.txt" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <!-- Needs a configured CMake tree. -->
+  <Target Name="GenerateThirdPartyNotices" BeforeTargets="BeforeBuild">
+    <MakeDir Directories="$([System.IO.Path]::GetDirectoryName('$(ThirdPartyNoticesPath)'))" />
+    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildThisFileDirectory)..\..\scripts\generate-notices.ps1&quot; -Output &quot;$(ThirdPartyNoticesPath)&quot;" />
+  </Target>
+
+  <!-- The package's version is fixed in Package.appxmanifest, so check that it follows <Version>. -->
+  <Target Name="CheckPackageVersion" BeforeTargets="BeforeBuild" Condition="'$(WindowsPackageType)' == 'MSIX'">
+    <XmlPeek
+      XmlInputPath="Package.appxmanifest"
+      Query="/m:Package/m:Identity/@Version"
+      Namespaces="&lt;Namespace Prefix='m' Uri='http://schemas.microsoft.com/appx/manifest/foundation/windows10' /&gt;">
+      <Output TaskParameter="Result" PropertyName="PackageManifestVersion" />
+    </XmlPeek>
+    <Error
+      Condition="'$(PackageManifestVersion)' != '$(Version).0'"
+      Text="Package.appxmanifest has version $(PackageManifestVersion), but &lt;Version&gt; is $(Version). Set it to $(Version).0." />
   </Target>
 
 </Project>

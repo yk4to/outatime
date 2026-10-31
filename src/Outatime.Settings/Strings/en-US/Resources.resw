@@ -182,6 +182,15 @@
   <data name="SchtasksFailed" xml:space="preserve">
     <value>Task Scheduler reported an error (exit code {0}).</value>
   </data>
+  <data name="StartupDisabledByUser" xml:space="preserve">
+    <value>Outatime's startup is turned off in Windows. Turn it on in Settings &gt; Apps &gt; Startup.</value>
+  </data>
+  <data name="StartupDisabledByPolicy" xml:space="preserve">
+    <value>Your organization manages whether Outatime starts at sign-in.</value>
+  </data>
+  <data name="PackageDescription" xml:space="preserve">
+    <value>Switches the IME with the Alt or Windows keys</value>
+  </data>
   <data name="ErrorDialogClose" xml:space="preserve">
     <value>OK</value>
   </data>

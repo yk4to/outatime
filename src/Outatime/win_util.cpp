@@ -1,5 +1,7 @@
 #include "win_util.hpp"
 
+#include <appmodel.h>
+
 namespace outatime {
 
 bool IsElevated() {
@@ -27,6 +29,19 @@ std::wstring ExeDirectory() {
     const DWORD len = GetModuleFileNameW(nullptr, path, MAX_PATH);
     const std::wstring full(path, len);
     return full.substr(0, full.find_last_of(L'\\'));
+}
+
+std::wstring PackageFamilyName() {
+    UINT32 length = 0;
+    if (GetCurrentPackageFamilyName(&length, nullptr) != ERROR_INSUFFICIENT_BUFFER) {
+        return {};
+    }
+    std::wstring name(length, L'\0');
+    if (GetCurrentPackageFamilyName(&length, name.data()) != ERROR_SUCCESS) {
+        return {};
+    }
+    name.resize(length - 1);  // The length includes the null terminator.
+    return name;
 }
 
 }  // namespace outatime

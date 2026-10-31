@@ -11,8 +11,10 @@
 namespace outatime {
 
 void OpenSettingsApp(HWND owner) {
-    // Distribution layout: Outatime.exe + settings\Outatime.Settings.exe
-    const std::wstring exe = ExeDirectory() + L"\\settings\\Outatime.Settings.exe";
+    // The zip has Outatime.exe + settings\Outatime.Settings.exe; the package has both at its root.
+    const wchar_t* relative = PackageFamilyName().empty() ? L"\\settings\\Outatime.Settings.exe"
+                                                          : L"\\Outatime.Settings.exe";
+    const std::wstring exe = ExeDirectory() + relative;
     const auto result = reinterpret_cast<INT_PTR>(
         ShellExecuteW(owner, L"open", exe.c_str(), nullptr, nullptr, SW_SHOWNORMAL));
     if (result <= 32) {

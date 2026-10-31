@@ -132,7 +132,7 @@
                         Toggled="SettingToggle_Toggled" />
                 </controls:SettingsCard>
 
-                <controls:SettingsCard x:Uid="StartupCard">
+                <controls:SettingsCard x:Name="StartupCard" x:Uid="StartupCard">
                     <controls:SettingsCard.HeaderIcon>
                         <FontIcon Glyph="&#xE7E8;" />
                     </controls:SettingsCard.HeaderIcon>
@@ -140,7 +140,7 @@
                     <ComboBox x:Name="StartupComboBox" SelectionChanged="StartupComboBox_SelectionChanged">
                         <ComboBoxItem x:Uid="StartupOff" />
                         <ComboBoxItem x:Uid="StartupNormal" />
-                        <ComboBoxItem x:Uid="StartupElevated" />
+                        <ComboBoxItem x:Name="StartupElevatedItem" x:Uid="StartupElevated" />
                     </ComboBox>
                 </controls:SettingsCard>
 

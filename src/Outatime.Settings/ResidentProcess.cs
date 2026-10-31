@@ -63,7 +63,7 @@ internal static partial class ResidentProcess
         else
         {
             // Explorer starts it without elevation even if this app runs elevated.
-            Process.Start("explorer.exe", $"\"{StartupManager.ResidentPath}\"")?.Dispose();
+            Process.Start("explorer.exe", AppPackage.ResidentLaunchTarget)?.Dispose();
         }
         if (!await WaitUntilAsync(() => FindWindowW(WindowClass, null) != 0))
         {

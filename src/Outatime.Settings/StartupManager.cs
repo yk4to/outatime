@@ -6,6 +6,7 @@ using System.Security.Principal;
 using System.Text;
 using Microsoft.Win32;
 using Microsoft.Windows.ApplicationModel.Resources;
+using Windows.ApplicationModel;
 
 namespace Outatime.Settings;
 
@@ -17,20 +18,26 @@ internal enum StartupMode
 }
 
 // Registers the resident process to start at sign-in: a Run key for a normal
-// start, or a scheduled task when it should run as administrator.
+// start, or a scheduled task when it should run as administrator. The MSIX
+// package can't write the Run key, so it has a startup task in its manifest
+// instead, and doesn't offer to run as administrator.
 internal static class StartupManager
 {
+    // Also the TaskId of the startup task in Package.appxmanifest.
     private const string Name = "Outatime";
     private const string RunKeyPath = @"Software\Microsoft\Windows\CurrentVersion\Run";
 
     private static readonly ResourceLoader Resources = new();
 
-    // Distribution layout: Outatime.exe + settings\Outatime.Settings.exe
-    public static string ResidentPath =>
-        Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "Outatime.exe"));
-
-    public static StartupMode GetMode()
+    public static async Task<StartupMode> GetModeAsync()
     {
+        if (AppPackage.IsPackaged)
+        {
+            var task = await StartupTask.GetAsync(Name);
+            return task.State is StartupTaskState.Enabled or StartupTaskState.EnabledByPolicy
+                ? StartupMode.Normal
+                : StartupMode.Off;
+        }
         if (TaskExists())
         {
             return StartupMode.Elevated;
@@ -42,6 +49,12 @@ internal static class StartupManager
     // Throws Win32Exception with ERROR_CANCELLED if the user declines the UAC prompt.
     public static async Task SetModeAsync(StartupMode mode)
     {
+        if (AppPackage.IsPackaged)
+        {
+            await SetStartupTaskAsync(mode == StartupMode.Normal);
+            return;
+        }
+
         // Task changes need a UAC prompt, so do them first: if it is declined, nothing has changed.
         if (mode == StartupMode.Elevated)
         {
@@ -55,11 +68,32 @@ internal static class StartupManager
         using var key = Registry.CurrentUser.CreateSubKey(RunKeyPath);
         if (mode == StartupMode.Normal)
         {
-            key.SetValue(Name, $"\"{ResidentPath}\"");
+            key.SetValue(Name, $"\"{AppPackage.ResidentPath}\"");
         }
         else
         {
             key.DeleteValue(Name, throwOnMissingValue: false);
+        }
+    }
+
+    // Users can turn the startup task off in Windows Settings, and only they can turn
+    // it back on.
+    private static async Task SetStartupTaskAsync(bool enabled)
+    {
+        var task = await StartupTask.GetAsync(Name);
+        if (!enabled)
+        {
+            task.Disable();
+            return;
+        }
+        switch (await task.RequestEnableAsync())
+        {
+            case StartupTaskState.Enabled or StartupTaskState.EnabledByPolicy:
+                return;
+            case StartupTaskState.DisabledByUser:
+                throw new InvalidOperationException(Resources.GetString("StartupDisabledByUser"));
+            default:
+                throw new InvalidOperationException(Resources.GetString("StartupDisabledByPolicy"));
         }
     }
 
@@ -129,7 +163,7 @@ internal static class StartupManager
     private static string TaskXml()
     {
         var user = WindowsIdentity.GetCurrent().User!.Value;
-        var command = SecurityElement.Escape(ResidentPath);
+        var command = SecurityElement.Escape(AppPackage.ResidentPath);
         return $"""
             <?xml version="1.0" encoding="UTF-16"?>
             <Task version="1.2" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
