@@ -1,9 +1,13 @@
 name: CI
 
+# Not for changes to Markdown files only, which nothing here builds or checks
+# beyond .editorconfig.
 on:
   push:
     branches: [main]
+    paths-ignore: ['**.md']
   pull_request:
+    paths-ignore: ['**.md']
   workflow_dispatch:
 
 permissions:
