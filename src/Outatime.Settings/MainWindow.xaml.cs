@@ -20,7 +20,7 @@ public sealed partial class MainWindow : Window
     // The resident process closes windows with this property when the user exits it (settings_app.cpp).
     private const string WindowProperty = "Outatime.Settings";
 
-    // This app's commit. The .NET SDK appends it to the informational version: "0.1.0+<sha>".
+    // This app's commit. The .NET SDK appends it to the informational version: "1.0.0+<sha>".
     private static readonly string? Commit = CommitOf(Assembly.GetExecutingAssembly()
         .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion);
 
