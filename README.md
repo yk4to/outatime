@@ -6,6 +6,12 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT License"></a>
   <br>
   <br>
+  English | <a href="README.ja.md">日本語</a>
+  <br>
+  <br>
+  <img width="800" src="media/screenshot-en.png" alt="The settings window, with Left Alt set to turn the IME off and Right Alt to turn it on">
+  <br>
+  <br>
 </div>
 
 > Switch the IME with a tap of the Alt or Windows key
