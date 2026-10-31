@@ -1,15 +1,16 @@
 <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
   <g transform="matrix(1.111111 0 0 1.142857 -1.555556 -3.428571)">
-    <path d="M6 11H23.4545L38 24L23.4545 37H6L19.0909 24L6 11Z" stroke="white" stroke-width="2" stroke-linejoin="round" shape-rendering="crispEdges" filter="url(#shadow)"/>
+    <use href="#arrow" stroke="white" stroke-width="2" stroke-linejoin="round" shape-rendering="crispEdges" filter="url(#shadow)"/>
     <g filter="url(#glow)">
       <mask id="cyan-mask" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="8" y="10" width="34" height="28">
-        <path d="M9 11H26.4545L41 24L26.4545 37H9L22.0909 24L9 11Z" fill="white" stroke="white" stroke-width="2" stroke-linejoin="round"/>
+        <use href="#arrow" x="3" fill="white" stroke="white" stroke-width="2" stroke-linejoin="round"/>
       </mask>
       <path d="M25.3125 12.1875L38.4375 24L25.3125 35.8125" stroke="#5EE9FF" stroke-width="5" stroke-linecap="square" stroke-linejoin="round" mask="url(#cyan-mask)"/>
     </g>
-    <path d="M6 11H23.4545L38 24L23.4545 37H6L19.0909 24L6 11Z" fill="url(#orange)" stroke="url(#orange)" stroke-width="2" stroke-linejoin="round"/>
+    <use href="#arrow" fill="url(#orange)" stroke="url(#orange)" stroke-width="2" stroke-linejoin="round"/>
   </g>
   <defs>
+    <path id="arrow" d="M6 11H23.4545L38 24L23.4545 37H6L19.0909 24L6 11Z"/>
     <filter id="shadow" x="1.99997" y="7.5" width="40" height="34" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
       <feFlood flood-opacity="0" result="background"/>
       <feColorMatrix in="SourceAlpha" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hard-alpha"/>
