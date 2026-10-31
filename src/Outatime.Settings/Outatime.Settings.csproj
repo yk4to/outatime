@@ -19,6 +19,9 @@
     <TreatWarningsAsErrors Condition="'$(CI)' == 'true'">true</TreatWarningsAsErrors>
     <!-- Outatime.exe takes its version from here too (src/Outatime/CMakeLists.txt). -->
     <Version>0.1.0</Version>
+    <!-- The exe's file description, which Task Manager shows as its name. -->
+    <AssemblyTitle>Outatime Switcher Settings</AssemblyTitle>
+    <Product>Outatime Switcher</Product>
     <DefaultLanguage>en-US</DefaultLanguage>
     <!-- Program.Main handles single-instance redirection before starting XAML. -->
     <DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>

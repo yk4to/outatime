@@ -14,19 +14,19 @@
   </resheader>
 
   <data name="AppTitle" xml:space="preserve">
-    <value>Outatime 設定</value>
+    <value>Outatime Switcher 設定</value>
   </data>
   <data name="SettingsTitle.Text" xml:space="preserve">
     <value>設定</value>
   </data>
   <data name="BuildMismatchInfoBar.Title" xml:space="preserve">
-    <value>在背景執行的 Outatime 版本不同</value>
+    <value>在背景執行的 Outatime Switcher 版本不同</value>
   </data>
   <data name="BuildMismatchInfoBar.Message" xml:space="preserve">
     <value>正在執行的版本與此設定應用程式不同。重新啟動即可切換到相同的版本。</value>
   </data>
   <data name="NotRunningInfoBar.Title" xml:space="preserve">
-    <value>Outatime 未在背景執行</value>
+    <value>Outatime Switcher 未在背景執行</value>
   </data>
   <data name="NotRunningInfoBar.Message" xml:space="preserve">
     <value>未執行時無法使用按鍵切換輸入法。</value>
@@ -109,10 +109,10 @@
     <value>開啟（以系統管理員身分執行）</value>
   </data>
   <data name="RestartElevatedTitle" xml:space="preserve">
-    <value>Outatime 未以系統管理員身分執行</value>
+    <value>Outatime Switcher 未以系統管理員身分執行</value>
   </data>
   <data name="RestartNormalTitle" xml:space="preserve">
-    <value>Outatime 正以系統管理員身分執行</value>
+    <value>Outatime Switcher 正以系統管理員身分執行</value>
   </data>
   <data name="RestartMessage" xml:space="preserve">
     <value>重新啟動以立即套用此設定。</value>
@@ -130,13 +130,13 @@
     <value>關於</value>
   </data>
   <data name="AboutExpander.Header" xml:space="preserve">
-    <value>Outatime</value>
+    <value>Outatime Switcher</value>
   </data>
   <data name="AboutVersion" xml:space="preserve">
     <value>版本 {0}</value>
   </data>
   <data name="LicenseCard.Header" xml:space="preserve">
-    <value>Outatime 依據 MIT 授權條款開發</value>
+    <value>Outatime Switcher 依據 MIT 授權條款開發</value>
   </data>
   <data name="RepositoryButton.Content" xml:space="preserve">
     <value>GitHub 存放庫</value>
@@ -154,7 +154,7 @@
     <value>無法變更啟動設定</value>
   </data>
   <data name="StartErrorTitle" xml:space="preserve">
-    <value>無法啟動 Outatime</value>
+    <value>無法啟動 Outatime Switcher</value>
   </data>
   <data name="OpenSettingsFileErrorTitle" xml:space="preserve">
     <value>無法開啟設定檔</value>
@@ -163,19 +163,19 @@
     <value>無法開啟協力廠商軟體授權</value>
   </data>
   <data name="RestartErrorTitle" xml:space="preserve">
-    <value>無法重新啟動 Outatime</value>
+    <value>無法重新啟動 Outatime Switcher</value>
   </data>
   <data name="ResidentExitTimeout" xml:space="preserve">
-    <value>Outatime 未結束。</value>
+    <value>Outatime Switcher 未結束。</value>
   </data>
   <data name="ResidentStartTimeout" xml:space="preserve">
-    <value>Outatime 未啟動。</value>
+    <value>Outatime Switcher 未啟動。</value>
   </data>
   <data name="SchtasksFailed" xml:space="preserve">
     <value>工作排程器發生錯誤（結束代碼 {0}）。</value>
   </data>
   <data name="StartupDisabledByUser" xml:space="preserve">
-    <value>Outatime 的啟動已在 Windows 中關閉。請在「設定 &gt; 應用程式 &gt; 啟動」中將其開啟。</value>
+    <value>Outatime Switcher 的啟動已在 Windows 中關閉。請在「設定 &gt; 應用程式 &gt; 啟動」中將其開啟。</value>
   </data>
   <data name="StartupDisabledByPolicy" xml:space="preserve">
     <value>登入時是否啟動由您的組織管理。</value>

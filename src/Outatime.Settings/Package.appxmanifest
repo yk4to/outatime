@@ -8,13 +8,15 @@
   xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
   IgnorableNamespaces="uap desktop rescap">
 
-  <!-- Placeholders until the name is reserved in Partner Center, which gives the Store's
-       Name and Publisher. Version is <Version> in Outatime.Settings.csproj plus ".0". -->
-  <Identity Name="Outatime" Publisher="CN=yk4to" Version="0.1.0.0" />
+  <!-- Name, Publisher and PublisherDisplayName are from the app's Product identity page in
+       Partner Center. Version is <Version> in Outatime.Settings.csproj plus ".0". -->
+  <Identity Name="YKato.OutatimeSwitcher" Publisher="CN=E840E022-A3F2-4BE3-906A-FA75CD5E95D6" Version="0.1.0.0" />
 
+  <!-- The Store requires this DisplayName, and the Start menu's below, to be the name reserved
+       in Partner Center. -->
   <Properties>
-    <DisplayName>Outatime</DisplayName>
-    <PublisherDisplayName>yk4to</PublisherDisplayName>
+    <DisplayName>Outatime Switcher</DisplayName>
+    <PublisherDisplayName>Y Kato</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 
@@ -31,7 +33,7 @@
     <!-- The Start menu entry. Started again while running, it opens the settings app. -->
     <Application Id="Outatime" Executable="Outatime.exe" EntryPoint="Windows.FullTrustApplication">
       <uap:VisualElements
-        DisplayName="Outatime"
+        DisplayName="Outatime Switcher"
         Description="ms-resource:PackageDescription"
         BackgroundColor="transparent"
         Square150x150Logo="Assets\Square150x150Logo.png"
@@ -39,7 +41,7 @@
       <Extensions>
         <!-- Replaces the Run key, which the package can't write. The settings app turns it on. -->
         <desktop:Extension Category="windows.startupTask" Executable="Outatime.exe" EntryPoint="Windows.FullTrustApplication">
-          <desktop:StartupTask TaskId="Outatime" Enabled="false" DisplayName="Outatime" />
+          <desktop:StartupTask TaskId="Outatime" Enabled="false" DisplayName="Outatime Switcher" />
         </desktop:Extension>
       </Extensions>
     </Application>

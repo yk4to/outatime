@@ -28,12 +28,12 @@ BEGIN
     BEGIN
         BLOCK "040904B0"
         BEGIN
-            VALUE "FileDescription", "Outatime"
+            VALUE "FileDescription", "Outatime Switcher"
             VALUE "FileVersion", OUTATIME_VERSION
             VALUE "InternalName", "Outatime"
             VALUE "LegalCopyright", "Copyright (c) 2026 Yuta Kato"
             VALUE "OriginalFilename", "Outatime.exe"
-            VALUE "ProductName", "Outatime"
+            VALUE "ProductName", "Outatime Switcher"
             VALUE "ProductVersion", OUTATIME_INFORMATIONAL_VERSION
         END
     END
@@ -52,9 +52,9 @@ BEGIN
     IDS_SETTINGS_NOT_FOUND "Settings app not found:\n"
     IDS_HOOK_FAILED "Failed to install the keyboard hook."
     IDS_MENU_PAUSE "&Pause"
-    IDS_TIP_PAUSED "Outatime (paused)"
-    IDS_TIP_FULL_SCREEN "Outatime (paused in full screen)"
-    IDS_TIP_OFF "Outatime (off)"
+    IDS_TIP_PAUSED "Outatime Switcher (paused)"
+    IDS_TIP_FULL_SCREEN "Outatime Switcher (paused in full screen)"
+    IDS_TIP_OFF "Outatime Switcher (off)"
 END
 
 LANGUAGE LANG_JAPANESE, SUBLANG_JAPANESE_JAPAN
@@ -65,9 +65,9 @@ BEGIN
     IDS_SETTINGS_NOT_FOUND "設定アプリが見つかりません:\n"
     IDS_HOOK_FAILED "キーボード フックを設定できませんでした。"
     IDS_MENU_PAUSE "一時停止(&P)"
-    IDS_TIP_PAUSED "Outatime (一時停止中)"
-    IDS_TIP_FULL_SCREEN "Outatime (全画面のため一時停止中)"
-    IDS_TIP_OFF "Outatime (オフ)"
+    IDS_TIP_PAUSED "Outatime Switcher (一時停止中)"
+    IDS_TIP_FULL_SCREEN "Outatime Switcher (全画面のため一時停止中)"
+    IDS_TIP_OFF "Outatime Switcher (オフ)"
 END
 
 LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
@@ -78,9 +78,9 @@ BEGIN
     IDS_SETTINGS_NOT_FOUND "找不到设置应用：\n"
     IDS_HOOK_FAILED "无法安装键盘挂钩。"
     IDS_MENU_PAUSE "暂停(&P)"
-    IDS_TIP_PAUSED "Outatime（已暂停）"
-    IDS_TIP_FULL_SCREEN "Outatime（全屏时已暂停）"
-    IDS_TIP_OFF "Outatime（已关闭）"
+    IDS_TIP_PAUSED "Outatime Switcher（已暂停）"
+    IDS_TIP_FULL_SCREEN "Outatime Switcher（全屏时已暂停）"
+    IDS_TIP_OFF "Outatime Switcher（已关闭）"
 END
 
 LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_TRADITIONAL
@@ -91,9 +91,9 @@ BEGIN
     IDS_SETTINGS_NOT_FOUND "找不到設定應用程式：\n"
     IDS_HOOK_FAILED "無法安裝鍵盤勾點。"
     IDS_MENU_PAUSE "暫停(&P)"
-    IDS_TIP_PAUSED "Outatime（已暫停）"
-    IDS_TIP_FULL_SCREEN "Outatime（全螢幕時已暫停）"
-    IDS_TIP_OFF "Outatime（已關閉）"
+    IDS_TIP_PAUSED "Outatime Switcher（已暫停）"
+    IDS_TIP_FULL_SCREEN "Outatime Switcher（全螢幕時已暫停）"
+    IDS_TIP_OFF "Outatime Switcher（已關閉）"
 END
 
 LANGUAGE LANG_KOREAN, SUBLANG_KOREAN
@@ -104,7 +104,7 @@ BEGIN
     IDS_SETTINGS_NOT_FOUND "설정 앱을 찾을 수 없습니다.\n"
     IDS_HOOK_FAILED "키보드 후크를 설치할 수 없습니다."
     IDS_MENU_PAUSE "일시 중지(&P)"
-    IDS_TIP_PAUSED "Outatime(일시 중지됨)"
-    IDS_TIP_FULL_SCREEN "Outatime(전체 화면이라 일시 중지됨)"
-    IDS_TIP_OFF "Outatime(꺼짐)"
+    IDS_TIP_PAUSED "Outatime Switcher(일시 중지됨)"
+    IDS_TIP_FULL_SCREEN "Outatime Switcher(전체 화면이라 일시 중지됨)"
+    IDS_TIP_OFF "Outatime Switcher(꺼짐)"
 END

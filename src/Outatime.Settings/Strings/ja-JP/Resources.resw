@@ -14,19 +14,19 @@
   </resheader>
 
   <data name="AppTitle" xml:space="preserve">
-    <value>Outatime 設定</value>
+    <value>Outatime Switcher 設定</value>
   </data>
   <data name="SettingsTitle.Text" xml:space="preserve">
     <value>設定</value>
   </data>
   <data name="BuildMismatchInfoBar.Title" xml:space="preserve">
-    <value>バックグラウンドで実行中の Outatime のバージョンが異なります</value>
+    <value>バックグラウンドで実行中の Outatime Switcher のバージョンが異なります</value>
   </data>
   <data name="BuildMismatchInfoBar.Message" xml:space="preserve">
     <value>この設定アプリとは別のバージョンが実行されています。再起動すると同じバージョンに切り替わります。</value>
   </data>
   <data name="NotRunningInfoBar.Title" xml:space="preserve">
-    <value>Outatime がバックグラウンドで実行されていません</value>
+    <value>Outatime Switcher がバックグラウンドで実行されていません</value>
   </data>
   <data name="NotRunningInfoBar.Message" xml:space="preserve">
     <value>実行されていない間は、キーで IME を切り替えられません。</value>
@@ -109,10 +109,10 @@
     <value>オン (管理者として実行)</value>
   </data>
   <data name="RestartElevatedTitle" xml:space="preserve">
-    <value>Outatime は管理者として実行されていません</value>
+    <value>Outatime Switcher は管理者として実行されていません</value>
   </data>
   <data name="RestartNormalTitle" xml:space="preserve">
-    <value>Outatime は管理者として実行されています</value>
+    <value>Outatime Switcher は管理者として実行されています</value>
   </data>
   <data name="RestartMessage" xml:space="preserve">
     <value>この設定をすぐに反映するには再起動してください。</value>
@@ -130,13 +130,13 @@
     <value>バージョン情報</value>
   </data>
   <data name="AboutExpander.Header" xml:space="preserve">
-    <value>Outatime</value>
+    <value>Outatime Switcher</value>
   </data>
   <data name="AboutVersion" xml:space="preserve">
     <value>バージョン {0}</value>
   </data>
   <data name="LicenseCard.Header" xml:space="preserve">
-    <value>Outatime は MIT ライセンスのもとで開発されています</value>
+    <value>Outatime Switcher は MIT ライセンスのもとで開発されています</value>
   </data>
   <data name="RepositoryButton.Content" xml:space="preserve">
     <value>GitHub リポジトリ</value>
@@ -154,7 +154,7 @@
     <value>起動の設定を変更できませんでした</value>
   </data>
   <data name="StartErrorTitle" xml:space="preserve">
-    <value>Outatime を起動できませんでした</value>
+    <value>Outatime Switcher を起動できませんでした</value>
   </data>
   <data name="OpenSettingsFileErrorTitle" xml:space="preserve">
     <value>設定ファイルを開けませんでした</value>
@@ -163,19 +163,19 @@
     <value>サードパーティ ソフトウェアのライセンスを開けませんでした</value>
   </data>
   <data name="RestartErrorTitle" xml:space="preserve">
-    <value>Outatime を再起動できませんでした</value>
+    <value>Outatime Switcher を再起動できませんでした</value>
   </data>
   <data name="ResidentExitTimeout" xml:space="preserve">
-    <value>Outatime が終了しませんでした。</value>
+    <value>Outatime Switcher が終了しませんでした。</value>
   </data>
   <data name="ResidentStartTimeout" xml:space="preserve">
-    <value>Outatime が起動しませんでした。</value>
+    <value>Outatime Switcher が起動しませんでした。</value>
   </data>
   <data name="SchtasksFailed" xml:space="preserve">
     <value>タスク スケジューラでエラーが発生しました (終了コード {0})。</value>
   </data>
   <data name="StartupDisabledByUser" xml:space="preserve">
-    <value>Outatime のスタートアップは Windows でオフにされています。設定 &gt; アプリ &gt; スタートアップ でオンにしてください。</value>
+    <value>Outatime Switcher のスタートアップは Windows でオフにされています。設定 &gt; アプリ &gt; スタートアップ でオンにしてください。</value>
   </data>
   <data name="StartupDisabledByPolicy" xml:space="preserve">
     <value>サインイン時に起動するかどうかは組織によって管理されています。</value>

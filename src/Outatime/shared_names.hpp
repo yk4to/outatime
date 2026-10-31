@@ -4,7 +4,7 @@
 
 namespace outatime {
 
-inline constexpr wchar_t kAppName[] = L"Outatime";
+inline constexpr wchar_t kAppName[] = L"Outatime Switcher";
 
 // The settings app uses these names too (ResidentProcess.cs).
 inline constexpr wchar_t kWindowClass[] = L"Outatime.Resident";
