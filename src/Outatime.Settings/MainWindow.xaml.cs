@@ -40,6 +40,8 @@ public sealed partial class MainWindow : Window
         AppTitleBar.Title = Title;
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(AppTitleBar);
+        // For Alt+Tab and the taskbar. The title bar's own icon is in MainWindow.xaml.
+        AppWindow.SetIcon(Path.Combine(AppContext.BaseDirectory, "Assets", "outatime.ico"));
 
         // AppWindow.Resize takes physical pixels, so scale by the window's DPI.
         _hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);

@@ -15,7 +15,11 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <TitleBar x:Name="AppTitleBar" />
+        <TitleBar x:Name="AppTitleBar">
+            <TitleBar.IconSource>
+                <ImageIconSource ImageSource="ms-appx:///Assets/outatime.png" />
+            </TitleBar.IconSource>
+        </TitleBar>
 
         <ScrollViewer Grid.Row="1">
             <StackPanel

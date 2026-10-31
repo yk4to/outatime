@@ -49,8 +49,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Shown in the About section. -->
+    <!-- Shown in the title bar and the About section. -->
     <Content Include="..\Outatime\icons\outatime.png" Link="Assets\outatime.png" CopyToOutputDirectory="PreserveNewest" />
+    <!-- The window's icon, for Alt+Tab and the taskbar. -->
+    <Content Include="..\Outatime\icons\outatime.ico" Link="Assets\outatime.ico" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <ItemGroup>
