@@ -109,7 +109,9 @@ Decision TapDetector::OnKey(const KeyEvent& event) {
         candidate_ = 0;
         DropReleasedKeys();
         const bool heldTooLong = event.time - candidateTime_ > kTapTimeoutMs;
-        if (pressed_.none() && !AnyMouseButtonDown() && !heldTooLong) {
+        // The key may have stopped being watched while held, e.g. when taps were paused
+        // for a full-screen app that came to the front.
+        if (IsWatched(vk) && pressed_.none() && !AnyMouseButtonDown() && !heldTooLong) {
             lastTapVk_ = vk;
             lastTapTime_ = event.time;
             return Decision::Tap;

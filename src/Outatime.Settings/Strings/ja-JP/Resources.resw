@@ -153,6 +153,9 @@
   <data name="StartupErrorTitle" xml:space="preserve">
     <value>起動の設定を変更できませんでした</value>
   </data>
+  <data name="StartupLoadErrorTitle" xml:space="preserve">
+    <value>起動の設定を読み込めませんでした</value>
+  </data>
   <data name="StartErrorTitle" xml:space="preserve">
     <value>Outatime Switcher を起動できませんでした</value>
   </data>

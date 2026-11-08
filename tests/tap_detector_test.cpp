@@ -183,6 +183,14 @@ TEST_F(TapDetectorTest, NothingWatchedWhenPaused) {
     EXPECT_EQ(Tap(kVkLeftWin, 1000, 1050), Decision::PassThrough);
 }
 
+TEST_F(TapDetectorTest, PausedWhileHeldIsNotTap) {
+    // E.g. a full-screen app came to the front between the key's press and release.
+    Down(kVkLeftAlt, 0);
+    detector.SetWatchedKeys(TapKeySet());
+    EXPECT_EQ(Up(kVkLeftAlt, 50), Decision::PassThrough);
+    EXPECT_FALSE(detector.TapKeyHeld());
+}
+
 TEST_F(TapDetectorTest, MissedKeyUpIsRecovered) {
     // X went down, but its key-up never reached the hook (e.g. on the secure desktop).
     Down(kVkX);

@@ -153,6 +153,9 @@
   <data name="StartupErrorTitle" xml:space="preserve">
     <value>시작 설정을 변경할 수 없습니다</value>
   </data>
+  <data name="StartupLoadErrorTitle" xml:space="preserve">
+    <value>시작 설정을 읽을 수 없습니다</value>
+  </data>
   <data name="StartErrorTitle" xml:space="preserve">
     <value>Outatime Switcher를 시작할 수 없습니다</value>
   </data>

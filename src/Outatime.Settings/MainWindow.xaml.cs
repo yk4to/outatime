@@ -54,7 +54,6 @@ public sealed partial class MainWindow : Window
             StartupComboBox.Items.Remove(StartupElevatedItem);
             StartupCard.ClearValue(SettingsCard.DescriptionProperty);
         }
-        LoadStartupMode();
         LoadSettingsFile();
 
         SettingsFileCard.Description = SettingsStore.FilePath;
@@ -77,15 +76,28 @@ public sealed partial class MainWindow : Window
         };
     }
 
-    private async void LoadStartupMode()
+    // Loads the startup mode once the content is loaded, which the error dialog needs. By then
+    // the constructor has finished, so everything it sets up is ready.
+    private async void StartupComboBox_Loaded(object sender, RoutedEventArgs e)
     {
         StartupComboBox.IsEnabled = false;
-        _startupMode = await StartupManager.GetModeAsync();
-        _updatingSelection = true;
-        StartupComboBox.SelectedIndex = (int)_startupMode;
-        _updatingSelection = false;
-        StartupComboBox.IsEnabled = true;
-        UpdateResidentInfoBars();
+        try
+        {
+            _startupMode = await StartupManager.GetModeAsync();
+            _updatingSelection = true;
+            StartupComboBox.SelectedIndex = (int)_startupMode;
+            _updatingSelection = false;
+            UpdateResidentInfoBars();
+        }
+        catch (Exception ex)
+        {
+            // Nothing is selected then, but choosing a mode still works or reports its own error.
+            await ShowErrorAsync("StartupLoadErrorTitle", ex.Message);
+        }
+        finally
+        {
+            StartupComboBox.IsEnabled = true;
+        }
     }
 
     private void LoadSettingsFile()

@@ -141,7 +141,10 @@
                         <FontIcon Glyph="&#xE7E8;" />
                     </controls:SettingsCard.HeaderIcon>
                     <!-- Item order matches StartupMode. -->
-                    <ComboBox x:Name="StartupComboBox" SelectionChanged="StartupComboBox_SelectionChanged">
+                    <ComboBox
+                        x:Name="StartupComboBox"
+                        Loaded="StartupComboBox_Loaded"
+                        SelectionChanged="StartupComboBox_SelectionChanged">
                         <ComboBoxItem x:Uid="StartupOff" />
                         <ComboBoxItem x:Uid="StartupNormal" />
                         <ComboBoxItem x:Name="StartupElevatedItem" x:Uid="StartupElevated" />

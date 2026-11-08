@@ -153,6 +153,9 @@
   <data name="StartupErrorTitle" xml:space="preserve">
     <value>無法變更啟動設定</value>
   </data>
+  <data name="StartupLoadErrorTitle" xml:space="preserve">
+    <value>無法讀取啟動設定</value>
+  </data>
   <data name="StartErrorTitle" xml:space="preserve">
     <value>無法啟動 Outatime Switcher</value>
   </data>

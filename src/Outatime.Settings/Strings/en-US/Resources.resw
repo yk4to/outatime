@@ -161,6 +161,9 @@
   <data name="StartupErrorTitle" xml:space="preserve">
     <value>Couldn't change the startup setting</value>
   </data>
+  <data name="StartupLoadErrorTitle" xml:space="preserve">
+    <value>Couldn't read the startup setting</value>
+  </data>
   <data name="StartErrorTitle" xml:space="preserve">
     <value>Couldn't start Outatime Switcher</value>
   </data>
