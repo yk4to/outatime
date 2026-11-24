@@ -28,9 +28,11 @@
 
 ## インストール
 
-Microsoft Store で近日公開予定です。
+<a href="https://apps.microsoft.com/detail/9NBT2WKZPL28?mode=direct"><img width="200" src="https://get.microsoft.com/images/ja%20dark.svg" alt="Microsoft から入手"></a>
 
-[Releases](https://github.com/yk4to/outatime/releases) から zip をダウンロードし、好きな場所に展開して `Outatime.exe` を実行することもできます。もう一度実行すると設定が開きます。
+[Microsoft Store](https://apps.microsoft.com/detail/9NBT2WKZPL28) から入手し、スタート メニューから Outatime Switcher を起動してください。もう一度起動すると設定が開きます。
+
+zip 版を自分でビルドし（[ビルド](#ビルド)を参照）、好きな場所に展開して `Outatime.exe` を実行することもできます。もう一度実行すると設定が開きます。
 
 Windows 10 バージョン 2004 以降（x64）が必要です。
 
