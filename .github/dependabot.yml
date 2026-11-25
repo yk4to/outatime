@@ -1,0 +1,25 @@
+# Opens PRs that update the actions in .github/workflows and the settings app's NuGet
+# packages. The C++ dependencies are fetched by CMake from a pinned URL and hash, which
+# Dependabot doesn't update: bump those by hand.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      actions:
+        patterns: ['*']
+
+  - package-ecosystem: nuget
+    directory: /src/Outatime.Settings
+    schedule:
+      interval: monthly
+    groups:
+      # Updated together: the csproj excludes the SDK's unused parts by naming them,
+      # so their versions have to follow Microsoft.WindowsAppSDK's.
+      windows-app-sdk:
+        patterns:
+          - Microsoft.WindowsAppSDK*
+          - Microsoft.Windows.AI.*
+          - System.Numerics.Tensors
