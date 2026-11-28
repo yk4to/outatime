@@ -15,11 +15,10 @@ updates:
     directory: /src/Outatime.Settings
     schedule:
       interval: monthly
-    groups:
-      # Updated together: the csproj excludes the SDK's unused parts by naming them,
-      # so their versions have to follow Microsoft.WindowsAppSDK's.
-      windows-app-sdk:
-        patterns:
-          - Microsoft.WindowsAppSDK*
-          - Microsoft.Windows.AI.*
-          - System.Numerics.Tensors
+    # The Windows App SDK is updated by hand. Dependabot bumped the parts the csproj
+    # excludes without the SDK itself, which mixes SDK versions; an update also needs
+    # the settings app run to check it, not just built.
+    ignore:
+      - dependency-name: Microsoft.WindowsAppSDK*
+      - dependency-name: Microsoft.Windows.AI.MachineLearning
+      - dependency-name: System.Numerics.Tensors
