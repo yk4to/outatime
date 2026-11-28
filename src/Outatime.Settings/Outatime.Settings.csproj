@@ -62,13 +62,14 @@
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.2.251219" />
-    <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.5.1" />
-    <!-- Unused parts of the Windows App SDK; excluding them keeps ~40 MB of DLLs out of the zip. -->
-    <PackageReference Include="Microsoft.WindowsAppSDK.AI" Version="2.5.5" ExcludeAssets="all" />
-    <PackageReference Include="Microsoft.WindowsAppSDK.ML" Version="2.1.94" ExcludeAssets="all" />
-    <PackageReference Include="Microsoft.WindowsAppSDK.Search" Version="2.5.5" ExcludeAssets="all" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.7.0" />
+    <!-- Unused parts of the Windows App SDK; excluding them keeps ~40 MB of DLLs out of the zip.
+         Their versions are the ones Microsoft.WindowsAppSDK depends on: update them with it. -->
+    <PackageReference Include="Microsoft.WindowsAppSDK.AI" Version="2.7.0" ExcludeAssets="all" />
+    <PackageReference Include="Microsoft.WindowsAppSDK.ML" Version="2.7.0" ExcludeAssets="all" />
+    <PackageReference Include="Microsoft.WindowsAppSDK.Search" Version="2.7.0" ExcludeAssets="all" />
     <!-- Dependencies of Microsoft.WindowsAppSDK.ML, which its ExcludeAssets doesn't reach. -->
-    <PackageReference Include="Microsoft.Windows.AI.MachineLearning" Version="2.1.74" ExcludeAssets="all" />
+    <PackageReference Include="Microsoft.Windows.AI.MachineLearning" Version="2.5.96" ExcludeAssets="all" />
     <PackageReference Include="System.Numerics.Tensors" Version="9.0.0" ExcludeAssets="all" />
   </ItemGroup>
 
